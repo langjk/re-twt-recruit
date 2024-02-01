@@ -1,25 +1,11 @@
 <script setup lang="ts">
+import Menu from '@/components/menu.vue'
 </script>
 
 <template>
     <el-container>
-        <el-header
-            bordered
-            collapse-mode="width"
-            :width="220"
-            :native-scrollbar="false"
-        >
-            <el-menu
-            class="el-menu-demo"
-            mode="horizontal"
-            default-active="/"
-            router="true"
-            >
-                <el-menu-item index="/">首页推荐</el-menu-item>
-                <el-menu-item index="/myapplication">我的申请</el-menu-item>
-                <el-menu-item index="/applymanage">招募管理</el-menu-item>
-                <el-menu-item index="/morehelp">更多帮助</el-menu-item>
-            </el-menu>
+        <el-header height="82px">
+            <Menu></Menu>
         </el-header>
 
         <article flex-1 flex flex-col overflow-hidden>
