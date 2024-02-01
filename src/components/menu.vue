@@ -1,10 +1,21 @@
+<script lang="ts">
+export default {
+    name:'Menu'
+}
+</script>
+
+<script setup lang="ts" name="Menu">
+import { getCurrentInstance } from 'vue';
+const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+</script>
+
 <template>
     <el-menu
     class="menu"
     mode="horizontal"
     default-active="/"
     :router="true"
-    active-text-color="#00A0E9"
+    :active-text-color="TWT"
     >
         <el-row class="TWT">
             <img src="@/assets/logo.png" alt="twt">
@@ -33,17 +44,18 @@
     height:82px;
 }
 .items{
-    font-size:16px;
+    font-size:18px;
     width:120px;
+    font-weight: 400;
 }
 .rightBar{
-    margin-left:400px;
+    margin-left:480px;
 }
 .mine{
-    font-size:25px;
+    font-size:20px;
 }
 .TWT{
-    margin:0 27px 0 359px;
+    margin:0 27px 0 312px;
     height:100%;
     align-items:center;
 }
@@ -52,7 +64,7 @@
 }
 .title {
     cursor: default;
-    font-size: 18px;
+    font-size: 20px;
     line-height: 82px;
     font-weight: 500;
 }
@@ -60,6 +72,6 @@
     color: #454545;
 }
 .blue {
-    color: #00a1e9;
+    color: v-bind(TWT);
 }
 </style>

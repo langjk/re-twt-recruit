@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import Menu from '@/components/menu.vue'
+import headerMenu from '@/components/Menu.vue'
 </script>
 
 <template>
     <el-container>
-        <el-header height="82px">
-            <Menu></Menu>
+        <el-header class="header">
+            <headerMenu></headerMenu>
         </el-header>
 
         <article flex-1 flex flex-col overflow-hidden>
@@ -20,4 +20,9 @@ import Menu from '@/components/menu.vue'
     </el-container>
 </template>
 
-<style scoped></style>
+<style scoped>
+.header{
+    height:82px;
+    padding:0;
+}
+</style>
