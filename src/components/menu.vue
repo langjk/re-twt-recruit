@@ -4,6 +4,7 @@
     mode="horizontal"
     default-active="/"
     :router="true"
+    active-text-color="#00A0E9"
     >
         <el-row class="TWT">
             <img src="@/assets/logo.png" alt="twt">
@@ -14,11 +15,11 @@
         <el-menu-item class="items" index="/myapplication">我的申请</el-menu-item>
         <el-menu-item class="items" index="/applymanage">招募管理</el-menu-item>
         <el-menu-item class="items" index="/morehelp">更多帮助</el-menu-item>
-        <div style="width:20%"></div>
-        <el-sub-menu class="items"  index="">
+        <el-sub-menu class="rightBar" index="">
             <template #title>
                 <el-icon><User /></el-icon>
-                langjc
+                <el-row class="mine">
+                    langjc</el-row>
             </template>
             <el-menu-item index="/myapplication">个人信息</el-menu-item>
             <el-menu-item index="2-2">退出登录</el-menu-item>
@@ -35,12 +36,19 @@
     font-size:16px;
     width:120px;
 }
+.rightBar{
+    margin-left:400px;
+}
+.mine{
+    font-size:25px;
+}
 .TWT{
-    margin:0 27px 0 375px;
+    margin:0 27px 0 359px;
     height:100%;
+    align-items:center;
 }
 .TWT img{
-    height:100%
+    height:36px;
 }
 .title {
     cursor: default;
