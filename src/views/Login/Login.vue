@@ -9,11 +9,13 @@
     const password = ref('')
 
     const loginCheck = () => {
-        http.post("/v1/user/login?account=" + account.value + '&password=' + password.value, {
-        }).then((res:{code:number,result:any})=>{
+        http.post("/v1/user/login",
+        {account:account.value,password:password.value, })
+        .then((res:{code:number,result:any})=>{
             if(res.code == 200){
                 setCookie('token',res.result.token,7);
                 setCookie('nickname',res.result.nickname,7);
+                setCookie('usertype',res.result.nickname,7);
                 router.push("/");
             }
         });

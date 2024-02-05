@@ -5,6 +5,7 @@ import App from './App.vue'
 import { useRouter } from '@/router'
 import './style.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import zhCn from "element-plus/es/locale/lang/zh-cn";
 
 const app = createApp(App)
 
@@ -16,7 +17,11 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 //主题色
 app.config.globalProperties.$lightTWT = '#E3F5FD'; 
 app.config.globalProperties.$TWT = '#00a1e9'; 
+app.config.globalProperties.$orgId = 773804030; 
 
-app.use(ElementPlus)
+
+app.use(ElementPlus, {
+  locale: zhCn,
+})
 useRouter(app)
 app.mount('#app')

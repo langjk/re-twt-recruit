@@ -8,10 +8,10 @@ export default {
 import { getCurrentInstance } from 'vue';
 import { getCookie,delCookie } from '@/utils/cookie';
 import { userDetail } from '@/types/userDetail';
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter();
-
+const route = useRoute();
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
 
 const UserDetail: userDetail = {name:'未登录',uid:0,nickname:'未登录'}
@@ -42,7 +42,7 @@ const checkLogin = () => {
     <el-menu
     class="menu"
     mode="horizontal"
-    default-active="/"
+    :default-active="'/' + route.path.split('/')[1]"
     :router="true"
     :active-text-color="TWT"
     >
@@ -95,12 +95,13 @@ const checkLogin = () => {
     cursor: default;
     font-size: 20px;
     line-height: 82px;
-    font-weight: 500;
 }
 .black {
     color: #454545;
+    font-family: 'Microsoft YaHei'
 }
 .blue {
     color: v-bind(TWT);
+    font-family: 'Microsoft YaHei SB'
 }
 </style>

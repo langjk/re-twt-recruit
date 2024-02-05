@@ -30,7 +30,7 @@ get(
     url: string,
     data: Data,
     config?: AxiosRequestConfig
-): Promise<AxiosResponse>;
+): Promise<any>;
 post(
     url: string,
     data: Data,

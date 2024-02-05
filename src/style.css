@@ -1,4 +1,22 @@
 body {
   background-color: #f2f2f2;
   margin:0;
+  font-family: 'Microsoft YaHei';
+}
+
+.el-menu-item.is-active { background-color:#E3F5FD!important; }
+.el-form {
+  --el-form-label-font-size: 16px !important;
+}
+@font-face {
+  font-family:'Microsoft YaHei';
+  src: url('@/assets/MSYH.TTC');
+}
+@font-face {
+  font-family:'Microsoft YaHei SB';
+  src: url('@/assets/MSYHSB.TTC');
+}
+@font-face {
+  font-family:'Microsoft YaHei L';
+  src: url('@/assets/MSYHL.TTC');
 }

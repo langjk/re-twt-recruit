@@ -2,6 +2,15 @@
 import { getCurrentInstance } from 'vue';
 import recruitList from './recruitsList.vue';
 import { Recruit } from './home.types';
+import http from '@/utils/http'
+
+
+http.get("/v1/user/project", {projectId:20
+        }).then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                console.log(res.result)
+            }
+        });
 
 const recruit:Recruit[]=[
     {
