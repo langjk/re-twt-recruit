@@ -76,7 +76,6 @@ const props = defineProps<Props>()
     height: 19px;
     margin:23px 0 0 23px;
     font-size: 22px;
-    font-family: Microsoft YaHei;
     font-weight: 600;
     color: #444444;
 }

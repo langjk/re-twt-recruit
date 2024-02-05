@@ -81,7 +81,6 @@
 .hintText{
     height: 25px;
     font-size: 18px;
-    font-family: Microsoft YaHei;
     font-weight: 400;
     color: #444444;
     margin-top:27px;
@@ -101,7 +100,6 @@
     text-align: center;
     height: 46px;
     font-size: 34px;
-    font-family: Microsoft YaHei;
     font-weight: bold;
     color: #00A1E9;
     margin-bottom:60px;
@@ -111,7 +109,6 @@
     background: v-bind(TWT);
     border-radius: 5px;
     font-size: 16px;
-    font-family: Microsoft YaHei;
     font-weight: bold;
     color: #FFFFFF;
     margin-top:48px;
@@ -124,7 +121,6 @@
 }
 .reg .text{
     font-size: 14px;
-    font-family: Microsoft YaHei;
     margin-top:15px;
 }
 .register{
@@ -134,7 +130,6 @@
 .hint{
     height: 54px;
     font-size: 14px;
-    font-family: Microsoft YaHei;
     color: #A6A6A6;
     line-height: 20px;
     margin:auto;
