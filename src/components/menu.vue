@@ -6,7 +6,36 @@ export default {
 
 <script setup lang="ts" name="Menu">
 import { getCurrentInstance } from 'vue';
+import { getCookie,delCookie } from '@/utils/cookie';
+import { userDetail } from '@/types/userDetail';
+import { useRouter } from 'vue-router'
+
+const router = useRouter();
+
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+
+const UserDetail: userDetail = {name:'未登录',uid:0,nickname:'未登录'}
+var userCookie = getCookie('nickname');
+if(userCookie){
+    UserDetail.name = userCookie;
+}
+
+const resetLogin = () => {
+    delCookie('token');
+    delCookie('nickname');
+    router.push('/Login')
+}
+
+const checkLogin = () => {
+    if(!userCookie){
+        delCookie('token');
+        delCookie('nickname');
+        router.push('/Login');
+    }
+    else{
+        router.push('/myApplication')
+    }
+}
 </script>
 
 <template>
@@ -30,10 +59,10 @@ const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT
             <template #title>
                 <el-icon><User /></el-icon>
                 <el-row class="mine">
-                    langjc</el-row>
+                    {{UserDetail.name}}</el-row>
             </template>
-            <el-menu-item index="/myapplication">个人信息</el-menu-item>
-            <el-menu-item index="2-2">退出登录</el-menu-item>
+            <el-menu-item @click="checkLogin()">个人信息</el-menu-item>
+            <el-menu-item index="/Login" @click="resetLogin()">退出登录</el-menu-item>
         </el-sub-menu>
     </el-menu>
 </template>
