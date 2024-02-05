@@ -37,20 +37,12 @@ const contact = ref('')
                                             <el-input :placeholder="'组别'+i" />
                                         </el-col>
                                         <el-col :span="4" class="buttonGroup">
-                                            <el-button class="groupOptionButton">
-                                                <el-icon><Plus /></el-icon>
-                                            </el-button>
-                                            <el-button class="groupOptionButton">
-                                                <el-icon><Minus /></el-icon>
-                                            </el-button>
+                                            <el-button class="groupOptionButton" icon="Plus" />
+                                            <el-button class="groupOptionButton" icon="Minus" />
                                         </el-col>
                                         <el-col :span="4" class="buttonGroup">
-                                            <el-button class="groupOptionButton">
-                                                <el-icon><Top /></el-icon>
-                                            </el-button>
-                                            <el-button class="groupOptionButton">
-                                                <el-icon><Bottom /></el-icon>
-                                            </el-button>
+                                            <el-button class="groupOptionButton" icon="Top" />
+                                            <el-button class="groupOptionButton" icon="Bottom" />
                                         </el-col>
                                     </el-row>    
                                     <el-row class="warning">

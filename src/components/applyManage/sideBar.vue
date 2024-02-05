@@ -5,10 +5,9 @@ export default {
 </script>
 <script setup lang="ts" name="appSideBar">
 import { getCurrentInstance } from 'vue';
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
-const router = useRouter();
 const route = useRoute();
 </script>
 

@@ -48,7 +48,7 @@ const handleOrg = () => {
 .title{
     font-size: 30px;
     margin:120px 0 36px 0;
-    font-family: 'Microsoft YaHei SB'
+    font-weight: 500;
 }
 .orgContainer{
     width: 720px;
@@ -68,6 +68,6 @@ const handleOrg = () => {
     border-radius: 5px;
     font-size:20px;
     line-height: 50px;
-    font-family: 'Microsoft YaHei L';
+    font-weight: lighter;
 }
 </style>

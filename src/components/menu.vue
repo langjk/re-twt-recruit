@@ -98,10 +98,9 @@ const checkLogin = () => {
 }
 .black {
     color: #454545;
-    font-family: 'Microsoft YaHei'
 }
 .blue {
     color: v-bind(TWT);
-    font-family: 'Microsoft YaHei SB'
+    font-weight: bold;
 }
 </style>
