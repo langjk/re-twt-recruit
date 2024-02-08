@@ -11,3 +11,25 @@ body {
 :root {
   --el-color-primary: #00a1e9; /* 例如: #1e9fff */
 }
+.el-input__wrapper{
+  border: 0.05vw solid #D4D4D4 !important;
+  box-shadow:0 0 0 0.05vw var(--el-input-border-color,var(--el-border-color)) inset
+}
+.el-radio{
+  --el-radio-input-border: 0.05vw solid #D4D4D4 !important;
+}
+.el-input__wrapper.is-focus{
+  box-shadow: 0 0 0 0.05vw #00a1e9 inset;
+}
+.el-input__wrapper:hover{
+  box-shadow: 0 0 0 0.15vw #c0c4cc inset;
+}
+.el-color-picker__trigger{
+  border: 0.05vw solid #D4D4D4 !important;
+}
+.el-color-picker__color{
+  border: 0.05vw solid #909399 !important;
+}
+.md-editor-toolbar{
+  height:1.5vw;
+}

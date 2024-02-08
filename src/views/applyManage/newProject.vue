@@ -52,7 +52,7 @@ const handleBackUpload = (response: any) =>
                         项目设定
                     </el-row>
                     <el-form label-position="left" class="blockForm">
-                        <el-space  direction="vertical" alignment="left">
+                        <el-space  direction="vertical" alignment="left" class="space">
                             <el-form-item label="标题">
                                 <el-input class="blockInput" v-model="title" placeholder="请输入招募标题"/>
                             </el-form-item>
@@ -161,7 +161,7 @@ const handleBackUpload = (response: any) =>
                         样式设定
                     </el-row>
                     <el-form label-position="left" class="blockForm">
-                        <el-space  direction="vertical" alignment="left">
+                        <el-space  direction="vertical" alignment="left" class="space">
                             <el-form-item label="封面图">
                                 <div class="imgUploadContainer">
                                     <el-upload 
@@ -307,6 +307,9 @@ const handleBackUpload = (response: any) =>
     margin-right:18px;
     background: v-bind(TWT);
 }
+.space{
+    gap:10px 0px !important;
+}
 .blockInput{
     width:330px;
     margin-left:70px;   
@@ -341,7 +344,7 @@ const handleBackUpload = (response: any) =>
     margin-left:7px;
     padding: 0;
     font-size:13px;
-    border: 1px solid  #b2b2b2;
+    border: 0.05vw solid  #b2b2b2;
 }
 .filterMethod{
     margin-left:38px;
@@ -378,7 +381,7 @@ const handleBackUpload = (response: any) =>
     text-align: center;
     margin: 0;
     padding: 0;
-    border: 1px solid  v-bind(TWT);
+    border: 0.05vw solid  v-bind(TWT);
     color:v-bind(TWT);
     border-radius: 20px;
 }
@@ -389,7 +392,7 @@ const handleBackUpload = (response: any) =>
 .editor{
     height:300px;
     box-shadow:0;
-    border: 1px solid #D4D4D4;
+    border: 0.05vw solid #D4D4D4;
     border-radius: 5px;
 }
 .imgUpload{
