@@ -19,7 +19,6 @@ app.config.globalProperties.$lightTWT = '#E3F5FD';
 app.config.globalProperties.$TWT = '#00a1e9'; 
 app.config.globalProperties.$orgId = 773804030; 
 
-
 app.use(ElementPlus, {
   locale: zhCn,
 })
