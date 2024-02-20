@@ -20,7 +20,7 @@ const layOutsRoutes: RouteRecordRaw[] = [
                     {
                         path:'newproject',
                         name:'newproject',
-                        component:  () => import("@/views/applyManage/newProject.vue")
+                        component:  () => import("@/views/applyManage/newProject/newProject.vue")
                     },
                     {
                         path:'authoritymanage',

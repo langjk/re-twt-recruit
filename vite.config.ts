@@ -4,7 +4,8 @@ import { resolve } from 'path'
 import pxtovw from 'postcss-px-to-viewport'
 const loder_pxtovw = pxtovw({
   viewportWidth: 1920,
-  viewportUnit: 'vw'
+  viewportUnit: 'vw',
+  selectorBlackList:['body']
 })
 // https://vitejs.dev/config/ 
 export default defineConfig({

@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { getCurrentInstance,ref } from 'vue';
+import { getCurrentInstance,ref, onMounted } from 'vue';
 import sideBar from '@/components/applyManage/sideBar.vue'
+import timeGroup from '@/components/applyManage/questions/time.vue'
+import textQuest from '@/components/applyManage/questions/text.vue'
+import selectQuest from '@/components/applyManage/questions/select.vue'
+import describeQuest from '@/components/applyManage/questions/describe.vue'
 import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import { ElMessage } from 'element-plus';
-
-
+import { VueDraggableNext } from 'vue-draggable-next'
+import { QuestionInstance,selectQ,textQ,describeQ,Department } from './newProjectType';
+import { getDepartments } from './newProjectApi'
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
 const title = ref('')
 const filterMethod = ref("0")
@@ -19,6 +24,28 @@ const backColor = ref('#00a1e9')
 const pageMethod = ref('25%')
 const circleMethod = ref('repeat')
 const lockMethod = ref('fixed')
+const addDialogVisible = ref(false)
+const newQuestionType = ref('t')
+const Questions = ref<any[]>([])
+const groups = ref([
+    {label:'默认组别',id:0},
+    {label:'组别2',id:1},
+    {label:'组别3',id:2}])
+const groupsIdCount = ref(3)
+const gradeSelectStart = ref('')
+const gradeSelectEnd = ref('')
+const campus = ref([])
+const identity = ref([])
+const allDepartments = ref<Department[]>([]);  
+onMounted(async () => {  
+    try {  
+    const departments = await getDepartments();  
+    allDepartments.value = departments;  
+    } catch (error) {  
+    console.error('Error fetching departments:', error);  
+    }  
+}); 
+const departmentSelect = ref([])
 const beforeUpload = (file:any) => {
         const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
         const isLt2M = file.size / 1024 / 1024 < 10;
@@ -36,7 +63,73 @@ const handleCoverUpload = (response: any) =>
 }
 const handleBackUpload = (response: any) => 
 {
-    backUrl.value = 'http://43.138.43.34:9925' + response.result
+    backUrl.value = 'http://43.138.43.34:9925' + response.results
+}
+const addGroup = () => {
+    let newGroup = {label:'',id:groupsIdCount.value}
+    groups.value.push(newGroup)
+    groupsIdCount.value++;
+}
+
+// 创建一个数组来存储组件的引用  
+const questionRefs = ref<QuestionInstance[]>([]); 
+// 定义子组件实例的类型  
+const deleteGroup = (index:number) => {
+    if(groups.value.length == 1){
+        ElMessage.warning('必须保留一个组别！')
+        return
+    }
+    else{
+        groups.value.splice(index-1,1)
+        questionRefs.value.forEach(ref => {  
+            if (ref) {  
+            ref.clearSelect(); 
+            }  
+        });
+    }
+}
+const addNewQuestion = () => {
+    switch(newQuestionType.value){
+        case 'd':
+            let d:describeQ={
+                type:'d',
+                title:'',
+                required:false,
+                groups:[]
+            }
+            Questions.value.push(d)
+            addDialogVisible.value = false;
+            return
+        case 't':
+            let t:textQ={
+                type:'t',
+                title:'',
+                required:false,
+                groups:[]
+            }
+            Questions.value.push(t)
+            addDialogVisible.value = false;
+            return
+        case 's':
+            let s:selectQ={
+                type:'s',
+                title:'',
+                optionDetail:{
+                    options:[{label:'选项1',id:0},{label:'选项2',id:1}],
+                    maxSelect:2,
+                    minSelect:1,
+                    optionsIdCount:2
+                },
+                required:false,
+                groups:[]
+            }
+            Questions.value.push(s)
+            addDialogVisible.value = false;
+            return
+    }
+}
+const handleDelete = (serial:number) => {
+    Questions.value.splice(serial,1)
 }
 </script>
 
@@ -58,31 +151,32 @@ const handleBackUpload = (response: any) =>
                             </el-form-item>
                             <el-form-item label="组别">
                                 <div class="groupForm">
-                                    <el-row class="groupTitle">
-                                        <el-col :span="3">组别文字</el-col>
-                                        <el-col :span="13"></el-col>
-                                        <el-col :span="2">增加</el-col>
-                                        <el-col :span="2">删除</el-col>
-                                        <el-col :span="2">上移</el-col>
-                                        <el-col :span="2">下移</el-col>
-                                    </el-row>
-                                    <el-row class="groupOption" v-for="i in 3" :key="i">
-                                        <el-col :span="16">
-                                            <el-input :placeholder="'组别'+i" />
-                                        </el-col>
-                                        <el-col :span="8" class="buttonGroup">
-                                            <el-button class="groupOptionButton" icon="Plus" />
-                                            <el-button class="groupOptionButton" icon="Minus" />
-                                            <el-button class="groupOptionButton" icon="Top" />
-                                            <el-button class="groupOptionButton" icon="Bottom" />
-                                        </el-col>
-                                    </el-row>    
+                                    <VueDraggableNext :list="groups" group="name" 
+                                        animation="500" handle=".groupOptionButtonSort">
+                                        <transition-group>
+                                            <el-row class="groupOption" v-for="i in groups.length" :key="i">
+                                                <el-col :span="19">
+                                                    <el-input :placeholder="'组别'+i" v-model="groups[i-1].label"/>
+                                                </el-col>
+                                                <el-col :span="5" class="buttonGroup">
+                                                    <el-button class="groupOptionButton"  
+                                                    type="danger" plain 
+                                                    icon="Delete" @click="deleteGroup(i)"/>
+                                                    <el-button class="groupOptionButtonSort"  
+                                                    type="primary" plain 
+                                                    icon="Sort"/>
+                                                </el-col>
+                                            </el-row> 
+                                        </transition-group>
+                                    </VueDraggableNext>   
+                                    <el-button class="addButton" @click="addGroup()">
+                                        新增组别
+                                    </el-button>
                                     <el-row class="warning">
                                         <el-icon class="icon"><Warning /></el-icon>
-                                        <div>如您未设置组别，将会生成一个默认组别 如项目只有一个组别，在表单中将不显示组别选项，直接选中组别</div>
+                                        <div>如您删除了一个组别，需要重新设置申请表单中问题组别 如项目只有一个组别，在表单中将不显示组别选项，直接选中组别</div>
                                     </el-row>
                                 </div>
-                            
                             </el-form-item>
                             <el-form-item label="筛选方式">
                                 <div class="filterMethod">
@@ -133,7 +227,7 @@ const handleBackUpload = (response: any) =>
                                     <div class="questButton">?</div>
                                     </template>
                                     <div>
-                                        请填写本项目的相关联系方式，此内容将提供给申 请者，以便在需要时与项目负责人取得联系
+                                        请填写本项目的相关联系方式，此内容将提供给申请者，以便在需要时与项目负责人取得联系
                                     </div>
                                 </el-popover>
                             </el-form-item>
@@ -280,6 +374,110 @@ const handleBackUpload = (response: any) =>
                         <span></span>
                         申请表单
                     </el-row>
+                    <el-form label-position="left" class="blockForm">
+                        <el-space  direction="vertical" alignment="left" class="space">
+                            <timeGroup></timeGroup>
+                            <VueDraggableNext :list="Questions" group="name" 
+                            animation="500" handle=".questionSort">
+                                <transition-group>
+                                    <div v-for="(item,index) in Questions" :key="index" > 
+                                        <textQuest v-if="item.type == 't'" :serial="index+2" 
+                                        :groups="groups" v-model="Questions[index]" ref="questionRefs"/>
+                                        <selectQuest v-if="item.type == 's'" :serial="index+2" 
+                                        :groups="groups" v-model="Questions[index]" ref="questionRefs" />
+                                        <describeQuest v-if="item.type == 'd'" :serial="index+2" 
+                                        :groups="groups" v-model="Questions[index]" ref="questionRefs" 
+                                        @deleteQ="handleDelete"/>
+                                    </div>
+                                </transition-group>
+                            </VueDraggableNext>
+                        </el-space>
+                        <el-button class="newQuestionButton" @click="addDialogVisible = true">新增问题</el-button>
+                        <el-dialog
+                            v-model="addDialogVisible"
+                            title="请选择新增问题类型"
+                            width="450"
+                        >
+                            <div style="display:flex;justify-content:center">
+                                <el-radio-group v-model="newQuestionType" size="large" >
+                                    <el-radio-button label="t" >多行文本题</el-radio-button>
+                                    <el-radio-button label="d" >文本描述</el-radio-button>
+                                    <el-radio-button label="s" >单选多选题</el-radio-button>
+                                </el-radio-group>
+                            </div>
+                            <div class="newQuestionHint">
+                                <div v-if="newQuestionType == 't'">申请人使用简答方式回答问题</div>
+                                <div v-if="newQuestionType == 's'">申请人使用选择方式回答问题</div>
+                                <div v-if="newQuestionType == 'd'">在问题之间插入的文本描述</div>
+                            </div>
+                            <template #footer>
+                            <div class="dialog-footer">
+                                <el-button @click="addDialogVisible = false">取消</el-button>
+                                <el-button type="primary" @click="addNewQuestion()">
+                                添加
+                                </el-button>
+                            </div>
+                            </template>
+                        </el-dialog>
+                    </el-form>
+                </div>
+                <div class="blockContainer">
+                    <el-row class="blockTitle">
+                        <span></span>
+                        限制条件
+                    </el-row>
+                    <el-row class="warning" style="margin-bottom:20px;">
+                        <el-icon class="icon"><Warning /></el-icon>
+                        <div>对不符合条件的申请者只会做出提示而不会拒绝提交申请</div>
+                    </el-row>
+                    <el-form label-position="left" class="blockForm">
+                        <el-space  direction="vertical" alignment="left" class="space">
+                            <el-form-item label="学院">
+                                    <el-select class="departmentSelector"
+                                    v-model="departmentSelect"
+                                    placeholder="请选择学院"
+                                    size="large"
+                                    multiple
+                                    >
+                                    <el-option
+                                        v-for="item in allDepartments"
+                                        :key="item.id"
+                                        :label="item.name"
+                                        :value="item.id"
+                                    />
+                                    </el-select>
+                            </el-form-item>
+                            <el-form-item label="年级">
+                                <div class="gradePickerL">
+                                    <el-date-picker
+                                    v-model="gradeSelectStart"
+                                    type="year"
+                                    />
+                                </div>
+                                至
+                                <div class="gradePickerR">
+                                    <el-date-picker
+                                    v-model="gradeSelectEnd"
+                                    type="year" 
+                                    />
+                                </div>
+                            </el-form-item>
+                            <el-form-item label="校区">
+                                <el-checkbox-group v-model="campus" class="campusSelector">
+                                    <el-checkbox label="卫津路校区" />
+                                    <el-checkbox label="北洋园校区" />
+                                </el-checkbox-group>
+                            </el-form-item>
+                            <el-form-item label="身份">
+                                <el-checkbox-group v-model="identity" class="campusSelector">
+                                    <el-checkbox label="本科生" />
+                                    <el-checkbox label="硕士生" />
+                                    <el-checkbox label="博士生" />
+                                    <el-checkbox label="教职工" />
+                                </el-checkbox-group>
+                            </el-form-item>
+                        </el-space>
+                    </el-form>
                 </div>
             </el-main>
         </el-container>
@@ -318,23 +516,29 @@ const handleBackUpload = (response: any) =>
     margin-left:47px;
 }
 .groupTitle{
-    width: 500px;
+    width: 530px;
     background: #F6F6F6;
     border-radius: 2px; 
+    flex-wrap: nowrap;
     color: #727272;
-    padding-left:23px;
+    font-size:14px;
     text-align: center;
+}
+.groupTitle #space{
+    margin-right:25px;
 }
 .groupForm{
     padding-left:70px;
 }
 .groupOption{
-    margin-top:20px;
+    margin-bottom:20px;
+    width:330px;
 }
 .buttonGroup{
     display: flex;
     justify-content: space-evenly;
-    align-items: center;
+    flex-direction: row-reverse;
+    align-items:center;
     width:100%;
 }
 .groupOptionButton{
@@ -346,9 +550,23 @@ const handleBackUpload = (response: any) =>
     font-size:13px;
     border: 0.05vw solid  #b2b2b2;
 }
+.groupOptionButtonSort{
+    width:23px;
+    height:23px;
+    margin: 0;
+    margin-left:7px;
+    padding: 0;
+    font-size:13px;
+    border: 0.05vw solid  #b2b2b2;
+}
 .filterMethod{
     margin-left:38px;
     font-size:18px;
+}
+.addButton{
+    background-color: v-bind(TWT);
+    color:white;
+    width:330px;
 }
 .warning{
     display:flex;
@@ -465,5 +683,37 @@ const handleBackUpload = (response: any) =>
     line-height:40px;
     margin: 0 auto;
 }
-
+.newQuestionButton{
+    background-color:v-bind(TWT);
+    color:white;
+    width:150px;
+    margin-left:320px;
+}
+.newQuestionHint{
+    font-size:18px;
+    text-align: center;
+    margin-top:20px
+}
+.gradePickerL :deep(.el-date-editor.el-input){
+    width:100px !important;
+}
+.gradePickerR :deep(.el-date-editor.el-input){
+    width:100px !important;
+}
+:deep(.el-date-editor.el-input){
+    width:330px !important;
+}
+.gradePickerL{
+    margin:0 20px 0 60px;
+}
+.gradePickerR{
+    margin:0 20px 0 20px;
+}
+.departmentSelector{
+    margin-left:60px;
+    width:500px;
+}
+.campusSelector{
+    margin-left:60px;
+}
 </style>

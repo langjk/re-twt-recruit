@@ -18,6 +18,7 @@
     "md-editor-v3": "^4.11.2",
     "postcss-load-config": "^5.0.2",
     "vue": "^3.4.15",
+    "vue-draggable-next": "^2.2.1",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
