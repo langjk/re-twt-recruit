@@ -28,10 +28,8 @@ const addDialogVisible = ref(false)
 const newQuestionType = ref('t')
 const Questions = ref<any[]>([])
 const groups = ref([
-    {label:'默认组别',id:0},
-    {label:'组别2',id:1},
-    {label:'组别3',id:2}])
-const groupsIdCount = ref(3)
+    {label:'默认组别',id:0}])
+const groupsIdCount = ref(1)
 const gradeSelectStart = ref('')
 const gradeSelectEnd = ref('')
 const campus = ref([])
@@ -131,6 +129,27 @@ const addNewQuestion = () => {
 const handleDelete = (serial:number) => {
     Questions.value.splice(serial,1)
 }
+const disabledDate = (time: Date) => {
+    return time.getTime() < Date.now()
+}
+const saveProject = () => {
+    //开始恐怖的整理项目格式和检查遗漏
+    //检查空组
+    if(title.value == ''){
+        ElMessage.warning('项目标题为空！')
+        return
+    }
+    groups.value.forEach((group,index) => {
+        if(group.label == ''){
+            ElMessage.warning('第'+(index+1)+'个组别名称为空！')
+            return
+        }
+    })
+    if(endTime.value == ''){
+        ElMessage.warning('截止日期为空！')
+        return
+    }
+}
 </script>
 
 <template>
@@ -209,6 +228,7 @@ const handleDelete = (serial:number) => {
                                         v-model="endTime"
                                         type="date"
                                         placeholder="请选择截止日期"
+                                        :disabled-date="disabledDate"
                                     />
                                     <el-row class="warning">
                                         <el-icon class="icon"><Warning /></el-icon>
@@ -479,13 +499,16 @@ const handleDelete = (serial:number) => {
                         </el-space>
                     </el-form>
                 </div>
+                <el-row style="justify-content:space-evenly">
+                    <el-button class="PreAndSaveButton" type="primary">表单预览</el-button>
+                    <el-button class="PreAndSaveButton" type="primary" @click="saveProject()">保存</el-button>
+                </el-row>
             </el-main>
         </el-container>
 </template>
 
 <style scoped>
 .blockContainer{
-    width: 888px;
     padding:25px;
     background: #FFFFFF;
     box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
@@ -715,5 +738,9 @@ const handleDelete = (serial:number) => {
 }
 .campusSelector{
     margin-left:60px;
+}
+.PreAndSaveButton{
+    width:264px;
+    margin-bottom:100px;
 }
 </style>

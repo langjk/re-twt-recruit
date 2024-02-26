@@ -36,6 +36,7 @@ const route = useRoute();
 </template>
 <style scoped>
 .container{
+    position:fixed;
     display: flex;
     flex-direction: column;
     width: 288px;

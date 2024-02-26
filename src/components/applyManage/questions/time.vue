@@ -259,6 +259,9 @@ const cleartimes = () => {
     justify-content: flex-end;
     box-shadow: 0px 1px 4px 0px rgba(92, 92, 92, 0.12)
 }
+.timeButtonGroup .el-button{
+    border: none !important;
+}
 .timeListBack0{
     position:absolute;
     height:40px;
