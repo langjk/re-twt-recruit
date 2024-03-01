@@ -92,7 +92,6 @@ const roleSelect = ref(0);
     width: 240px;
     height: 32px;
     background: #FFFFFF;
-    box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
     border-radius: 10px;
 }
 .manageContainer{
@@ -104,13 +103,14 @@ const roleSelect = ref(0);
     width: 192px;
     height: 32px;
     background: #FFFFFF;
-    box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
     border-radius: 10px;
     margin-left:24px;
 }
 .defaultButton{
     width: 100px;
     margin-left:24px;
-    box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
+}
+.space{
+    gap:3px 0px !important;
 }
 </style>

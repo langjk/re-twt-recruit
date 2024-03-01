@@ -32,6 +32,7 @@ const projectData:Bar[] = [
             <sideBar></sideBar>
         </el-aside>
         <el-main style="padding:0;overflow:hidden">
+            <el-space  direction="vertical" alignment="left" class="space">
             <div class="blockContainer">
                 <el-row class="blockTitle">
                     <span></span>
@@ -46,6 +47,7 @@ const projectData:Bar[] = [
                     </el-space>
                 </el-form>
             </div>
+            </el-space>
         </el-main>
 
     </el-container>

@@ -1,35 +1,44 @@
 <script lang="ts">
 export default {
-    name:'appSideBar'
+    name:'projectSideBar'
 }
 </script>
-<script setup lang="ts" name="appSideBar">
+<script setup lang="ts" name="projectSideBar">
 import { getCurrentInstance } from 'vue';
 import { useRoute } from 'vue-router'
 
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
 const route = useRoute();
+
+const props = defineProps({
+    title: { type: String, required: true },
+    status:{ type: Number, required: true }
+})
+const status = ['正在招募-公开','正在招募-非公开','停止招募-公开','停止招募-非公开']
 </script>
 
 <template>
     <div class="container">
         <img src="@/assets/logo.png" class="avatar" />
-        <div class="nickName">天外天工作室</div>
-        <div class="orgTitle">校级学生组织</div> 
+        <div class="nickName">{{props.title}}</div>
+        <div class="statusTitle" :style="(props.status<2)?('color:#93EA86'):('color:#DC5C5C')">{{status[props.status]}}</div> 
         <el-divider style="width:75%;margin:0 auto" />
         <el-menu mode="vertical" class="sideMenu" :router="true" :default-active="route.path"
         :active-text-color="TWT"    >
-            <el-menu-item class="menuItem" index="/applymanage/newproject">
-                新建项目
+            <el-menu-item class="menuItem" index="/projectdetail/projectSet">
+                项目设定
             </el-menu-item>
-            <el-menu-item class="menuItem" index="/applymanage/projectmanage">
-                项目管理
+            <el-menu-item class="menuItem" index="/projectdetail/appManage">
+                申请管理
             </el-menu-item>
-            <el-menu-item class="menuItem" index="/applymanage/authoritymanage">
-                权限管理
+            <el-menu-item class="menuItem" index="/projectdetail/appInter">
+                申请录入
             </el-menu-item>
-            <el-menu-item class="menuItem" index="/applymanage/messagemanage">
-                消息管理
+            <el-menu-item class="menuItem" index="/projectdetail/interviewControl">
+                面试控制
+            </el-menu-item>
+            <el-menu-item class="menuItem" index="/projectdetail/timeGroup">
+                时间分组
             </el-menu-item>
         </el-menu>
     </div>
@@ -63,7 +72,7 @@ const route = useRoute();
     color: #444444;
     margin:30px 0 13px 0;
 }
-.orgTitle{
+.statusTitle{
     height: 17px;
     font-size: 16px;
     margin-bottom:20px;

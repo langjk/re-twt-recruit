@@ -12,7 +12,8 @@ const props = defineProps<{
 <template>
     <el-row class="barContainer">
         <el-col :span="2">
-            <img src="@/assets/logo.png" class="avatar" />
+            <div class="imgContainer">
+            </div>
         </el-col>
         <el-col :span="12" class="text">
             <div class="title">{{props.data.title}}</div>
@@ -35,12 +36,18 @@ const props = defineProps<{
 <style scoped>
 .barContainer{
     width:930px;
+    height: 50px;
+}
+.imgContainer{
+    height:50px;
+    width:50px;
+    background-image: url('@/assets/logo.png');
+    background-size: contain;
 }
 .avatar{
-    width: 50px;
-    height: 50px;
+    width: 100%;
+    height: 100%;
     background: #FFFFFF;
-    border-radius: 50%;
 }
 .title{
     width: 245px;
@@ -77,6 +84,7 @@ const props = defineProps<{
     align-content: space-between;
     display: flex;
     justify-content: space-around;
+    height:50px;
 }
 .member{
     width: 80%;
@@ -90,11 +98,11 @@ const props = defineProps<{
 .buttonContainer{
     align-items: center;
     display: flex;
+    height:50px;
 }
 .button{
     width: 72px;
     height: 30px;
-    box-shadow: 0px 1px 2px 0px rgba(92,92,92,0.12);
     border-radius: 5px;
 }
 </style>

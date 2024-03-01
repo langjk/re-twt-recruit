@@ -53,6 +53,38 @@ const layOutsRoutes: RouteRecordRaw[] = [
                 path: 'myapplication',
                 name: 'myapplication',
                 component: () => import("@/views/myApplication/index.vue"),
+            },
+            {
+                path: 'projectdetail',
+                name: 'projectdetail',
+                component: () => import("@/views/applyManage/projectDetail.vue"),
+                children:[
+                    {
+                        path:'appInter',
+                        name:'appInter',
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/appInter.vue")
+                    },
+                    {
+                        path:'appManage',
+                        name:'appManage',
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/appManage.vue")
+                    },
+                    {
+                        path:'interviewControl',
+                        name:'interviewControl',
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/interviewControl.vue")
+                    },
+                    {
+                        path:'projectSet',
+                        name:'projectSet',
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/projectSet.vue")
+                    },
+                    {
+                        path:'timeGroup',
+                        name:'timeGroup',
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/timeGroup.vue")
+                    },
+                ]
             }
         ]
     }
