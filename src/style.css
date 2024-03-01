@@ -21,7 +21,7 @@ body {
 }
 .el-input__wrapper{
   border: 0.05vw solid #D4D4D4 !important;
-  box-shadow:0 0 0 0.05vw var(--el-input-border-color,var(--el-border-color)) inset
+  box-shadow:0 0 0 0.02vw var(--el-input-border-color,var(--el-border-color)) inset
 }
 .el-radio{
   --el-radio-input-border: 0.05vw solid #D4D4D4 !important;
@@ -45,11 +45,14 @@ body {
   border: 0.05vw solid #dcdfe6 !important;
 }
 .el-select__wrapper{
-  box-shadow: 0 0 0 0.10vw #c0c4cc inset;
+  box-shadow: 0 0 0 0.05vw #c0c4cc inset;
 }
 .el-checkbox__inner::after{
   top: 0.05vw;
   border: 0.05vw solid transparent;
   border-left:0;
   border-top:0;
+}
+.el-divider--horizontal{
+  border-top: 0.05vw var(--el-border-color) var(--el-border-style);
 }

@@ -25,7 +25,7 @@ const layOutsRoutes: RouteRecordRaw[] = [
                     {
                         path:'authoritymanage',
                         name:'authoritymanage',
-                        component:  () => import("@/views/applyManage/authorityManage.vue")
+                        component:  () => import("@/views/applyManage/authorityManage/authorityManage.vue")
                     },
                     {
                         path:'messagemanage',
@@ -35,7 +35,7 @@ const layOutsRoutes: RouteRecordRaw[] = [
                     {
                         path:'projectmanage',
                         name:'projectmanage',
-                        component:  () => import("@/views/applyManage/projectManage.vue")
+                        component:  () => import("@/views/applyManage/projectManage/projectManage.vue")
                     },
                     {
                         path:'orgselect',

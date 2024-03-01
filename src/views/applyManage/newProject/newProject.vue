@@ -157,7 +157,7 @@ const saveProject = () => {
             <el-aside>
                 <sideBar></sideBar>
             </el-aside>
-            <el-main style="padding:0">
+            <el-main style="padding:0;overflow:hidden">
                 <div class="blockContainer">
                     <el-row class="blockTitle">
                         <span></span>
@@ -509,6 +509,7 @@ const saveProject = () => {
 
 <style scoped>
 .blockContainer{
+    width:950px;
     padding:25px;
     background: #FFFFFF;
     box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
