@@ -11,6 +11,8 @@ import { ElMessage } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next'
 import { QuestionInstance,selectQ,textQ,describeQ,Department } from './newProjectType';
 import { getDepartments } from './newProjectApi'
+import { useRouter } from 'vue-router'
+const router = useRouter();
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
 const title = ref('')
 const filterMethod = ref("0")
@@ -149,6 +151,21 @@ const saveProject = () => {
         ElMessage.warning('截止日期为空！')
         return
     }
+}
+const gotoPreview = () => {
+    const data = {
+        title:title.value,
+        brief:brief.value
+    }
+    const url = router.resolve(
+        { 
+            name: 'projectPreview', 
+            params: { 
+                data:JSON.stringify(data)
+            } 
+        }
+    ).href;
+    window.open(url, '_blank');
 }
 </script>
 
@@ -500,7 +517,7 @@ const saveProject = () => {
                 </el-form>
             </div>
             <el-row style="justify-content:space-evenly">
-                <el-button class="PreAndSaveButton" type="primary">表单预览</el-button>
+                <el-button class="PreAndSaveButton" type="primary" @click="gotoPreview()">表单预览</el-button>
                 <el-button class="PreAndSaveButton" type="primary" @click="saveProject()">保存</el-button>
             </el-row>
         </el-main>

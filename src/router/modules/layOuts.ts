@@ -85,7 +85,12 @@ const layOutsRoutes: RouteRecordRaw[] = [
                         component:  () => import("@/views/applyManage/projectManage/manageDetail/timeGroup.vue")
                     },
                 ]
-            }
+            },
+            {
+                path:'projectPreview/:data',
+                name:'projectPreview',
+                component:  () => import("@/views/applyManage/newProject/projectPreview.vue")
+            },
         ]
     }
 ]

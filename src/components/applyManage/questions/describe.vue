@@ -4,7 +4,7 @@ export default {
 }
 </script>
 <script setup lang="ts" name="describe">
-import { getCurrentInstance,ref,defineExpose } from 'vue';
+import { getCurrentInstance,ref } from 'vue';
 import { describeQ } from '@/views/applyManage/newProject/newProjectType';
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
 const props = defineProps({

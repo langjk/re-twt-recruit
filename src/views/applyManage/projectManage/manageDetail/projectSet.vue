@@ -2,6 +2,7 @@
 import { getCurrentInstance,ref } from 'vue';
 import projectSideBar from '@/components/applyManage/projectManage/projectSideBar.vue';
 import { MdEditor } from 'md-editor-v3';
+import { ElMessage } from 'element-plus';
 import 'md-editor-v3/lib/style.css';
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
 const title = ref('')
@@ -18,6 +19,25 @@ const circleMethod = ref('repeat')
 const lockMethod = ref('fixed')
 const disabledDate = (time: Date) => {
     return time.getTime() < Date.now()
+}
+const beforeUpload = (file:any) => {
+        const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
+        const isLt2M = file.size / 1024 / 1024 < 10;
+        if (!isJPG) {
+            ElMessage.error('上传图片只能是 JPG/PNG 格式!');
+        }
+        if (!isLt2M) {
+            ElMessage.error('上传图片大小不能超过 10MB!');
+        }
+        return isJPG && isLt2M;
+    }
+const handleCoverUpload = (response: any) => 
+{
+    coverUrl.value = 'http://43.138.43.34:9925' + response.result
+}
+const handleBackUpload = (response: any) => 
+{
+    backUrl.value = 'http://43.138.43.34:9925' + response.results
 }
 </script>
 
