@@ -1,11 +1,33 @@
 <script lang="ts" setup>
-import { getCurrentInstance } from 'vue';
+import { getCurrentInstance,ref,onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { MdPreview } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
-const route = useRoute()
+import textQuest from '@/components/applyManage/questions/text.vue'
+import selectQuest from '@/components/applyManage/questions/select.vue'
+import describeQuest from '@/components/applyManage/questions/describe.vue' 
+const route = useRoute();
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
 const data = JSON.parse(route.params.data as string);
+const answers = ref([])
+const fetchGroup = () => {
+    data.groups.forEach(ref => {
+        answers.value.push([])
+    });
+}
+
+const titleColor = data.titleColor;
+const backColor = data.backColor;
+const groupSelect = ref<string[]>([]);
+const checkGroupSelect = (label:string) => {
+    return groupSelect.value.includes(label);
+}
+onMounted(async () => {  
+    try {  
+    fetchGroup();} catch (error) {  
+    console.error('Error fetching groups:', error);  
+    }  
+}); 
 </script>
 <template>
     <div class="container">
@@ -61,12 +83,97 @@ const data = JSON.parse(route.params.data as string);
             </el-row>
             <div class="inforContainer">
                 <div class="questTitle">
-                    1.组别（请按志愿顺序排序）
+                    1.组别
                 </div>
+                <el-checkbox-group class="groupButtonContainer" v-model="groupSelect">
+                    <el-checkbox
+                        v-for="group in data.groups"
+                        :key="group.id"
+                        :label="group.label"
+                        :value="group.id"
+                        ></el-checkbox>
+                </el-checkbox-group>
             </div>
+            <div class="inforContainer">
+                <div class="questTitle">
+                    2.{{ data.timeQuestTitle }}
+                </div>
+                <el-tabs type="border-card" class="time-tabs">
+                    <el-tab-pane label='上午'>
+                    <slot>
+                        <div v-for="index in 5" :key="index"  class="timeTab">
+                            <div  v-if="data.timeQuestTime[index-1]">
+                                <el-divider></el-divider>
+                                <el-checkbox style="width:100%"
+                                :label="(index+6)+':00~'+(index+7)+':00'" value="Value A" />
+                            </div>
+                        </div>
+                    </slot>
+                    </el-tab-pane>
+                    <el-tab-pane label='下午'>
+                        <slot>
+                            <div v-for="index in 5" :key="index"  class="timeTab">
+                                <div  v-if="data.timeQuestTime[index+4]">
+                                    <el-divider></el-divider>
+                                    <el-checkbox style="width:100%"
+                                    :label="(index+11)+':00~'+(index+12)+':00'" value="Value A" />
+                                </div>
+                            </div>
+                        </slot>
+                    </el-tab-pane>
+                    <el-tab-pane label='晚上'>
+                        <slot>
+                            <div v-for="index in 5" :key="index"  class="timeTab">
+                                <div  v-if="data.timeQuestTime[index+9]">
+                                    <el-divider></el-divider>
+                                    <el-checkbox style="width:100%"
+                                    :label="(index+16)+':00~'+(index+17)+':00'" value="Value A" />
+                                </div>
+                            </div>
+                        </slot>
+                    </el-tab-pane>
+                </el-tabs>
+            </div>
+            <dic class="inforContainer">
+                <el-collapse class="groupCol">
+                    <div  v-for="group in data.groups" :key="group.id" >
+                        <el-collapse-item :title="group.label+' 问卷'" 
+                        v-if="checkGroupSelect(group.label)">
+                            <div class="questionContainer">
+                                <div v-for="(item,index) in data.Questions" :key="index" > 
+                                    <div class="questionTitle">
+                                        {{index+1}}. {{ item.title }}
+                                    </div>
+                                    <div v-if="item.type == 't'">
+                                        <el-input
+                                        v-model="answers[group.id][index]"
+                                        class="textInput"
+                                        :autosize="{ minRows: 2, maxRows: 4 }"
+                                        type="textarea"
+                                        placeholder="请简述你的回答"
+                                        />
+                                    </div>
+                                    <div v-if="item.type == 's'">
+                                        <el-checkbox-group class="selectInput" v-model="answers[group.id][index]">
+                                            <el-checkbox
+                                                v-for="option in item.optionDetail.options"
+                                                :key="option.id"
+                                                :label="option.label"
+                                                :value="option.id"
+                                                ></el-checkbox>
+                                        </el-checkbox-group>
+                                    </div>
+                                </div>
+                            </div>
+                        </el-collapse-item>
+                    </div>
+                </el-collapse>
+            </dic>
         </div>
     </div>
 </template>
+<style>
+</style>
 <style scoped>
 .container{
     display: flex;
@@ -74,6 +181,9 @@ const data = JSON.parse(route.params.data as string);
     padding:26px 0;
     flex-direction: column;
     justify-content: center;
+    background-color:v-bind(backColor);
+    min-height:100vh;
+
 }
 .warnDiv{
     width: 1200px;
@@ -103,7 +213,7 @@ const data = JSON.parse(route.params.data as string);
 .title{
     height: 30px;
     font-size: 24px;
-    color: #444444;
+    color: v-bind(titleColor);
     margin-bottom:23px;
 }
 .blockContainer{
@@ -134,9 +244,64 @@ const data = JSON.parse(route.params.data as string);
     margin-bottom:15px;
 }
 .questTitle{
-    width: 215px;
     height: 17px;
     font-size: 16px;
     color: v-bind(TWT);
+}
+.groupButtonContainer{
+    margin-left: 10px;
+    margin-top:15px;
+}
+.time-tabs{
+    margin: 20px 10px;
+    width:1128px;
+}
+:deep(.el-tabs__item){
+    width:100%;
+}
+:deep(.el-tabs__nav){
+    width:100%;
+}
+:deep(.el-tabs__content){
+    padding:0;
+}
+.timeTab{
+    width:100%;
+    border-radius: 5px;
+    margin-left:20px;
+}
+.timeTab .el-divider{
+    margin:0 -20px;
+}
+.groupCol{
+    width:1128px;
+    margin-left:40px;
+}
+:deep(.el-collapse-item__header){
+    background-color:rgb(245,247,250);
+    padding-left:20px;
+    margin-top:20px;
+}
+:deep(.el-collapse-item__wrap){
+    box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
+    border-radius: 0 0 10px 10px; 
+    padding-top:10px;
+}
+.questionContainer{
+    margin-left:20px;
+}
+.questionTitle{
+    color:v-bind(TWT)
+}
+.textInput{
+    margin:10px 0 10px 15px;
+    width:1000px;
+}
+.selectInput{
+    margin:0 0 10px 15px;
+    font-size:10px;
+}
+.selectInput :deep(.el-checkbox__label){
+    font-size:12px;
 }
 </style>

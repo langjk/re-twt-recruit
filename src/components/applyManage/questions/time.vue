@@ -5,8 +5,8 @@ export default {
 </script>
 <script setup lang="ts" name="timeGroup">
 import { getCurrentInstance,ref } from 'vue';
+import { timeQ } from '@/views/applyManage/newProject/newProjectType';
 const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
-const timeInputTitle = ref('您倾向于什么时间参加面试')
 // const timeGroupOptions = [
 //     {
 //         value:'0',
@@ -21,6 +21,7 @@ const timeInputTitle = ref('您倾向于什么时间参加面试')
 const timedivWidth = ref([0,0,0])
 const timedivLeft = ref([64,64,64])
 const timescounter = ref([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+const model = defineModel<timeQ>({default:{title:'您倾向于什么时间参加面试',time:[]}})
 const TimeFlag = (Data:number) =>{//大一怎么写出这两百行的b函数的
     if(timescounter.value[Data] == 0){
         if(Data < 5){
@@ -218,7 +219,8 @@ const TimeFlag = (Data:number) =>{//大一怎么写出这两百行的b函数的
         }
         }
     }
-    }
+    model.value.time = timescounter.value
+}
 const cleartimes = () => {
         for(let i =0;i<20;i++)
             timescounter.value.splice(i,1,0);
@@ -231,8 +233,8 @@ const cleartimes = () => {
     <el-form-item>
         <el-row style="display:flex;align-items: flex-start;">
             <div class="questionTitle">1.面试时间题</div>
-            <el-row style="felx-direction:column">
-                <el-input placeholder="请输入问题描述" class="timeInput" v-model="timeInputTitle"></el-input>
+            <el-row>
+                <el-input placeholder="请输入问题描述" class="timeInput" v-model="model.title"></el-input>
                 <el-row class="timeSelectContainer">
                     <div class="timeSelectTitle">面试时间范围选择</div>
                     <div class="timeListBack0"></div>

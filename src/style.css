@@ -1,12 +1,8 @@
 body {
   background-color: #f2f2f2;
   margin:0;
-  font-family: 'YaHei';
+  font-family: 'Microsoft YaHei';
   min-width: 600px;
-}
-@font-face {
-  font-family: 'YaHei';
-  src: url('@/assets/MSYH.TTC');
 }
 .el-menu-item.is-active { background-color:#E3F5FD!important; }
 .el-form {

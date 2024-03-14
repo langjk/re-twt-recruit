@@ -37,3 +37,8 @@ export type DepartmentsResponse = {
     code: number;    
     result: Department[];    
 };   
+
+export type timeQ = {
+    title:string,
+    time:number[]
+}

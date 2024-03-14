@@ -88,7 +88,7 @@ const deleteQuestion = () => {
         </el-row>
         
         <div class="groupForm">
-            <VueDraggableNext :list="model.optionDetail.options" group="name" 
+            <VueDraggableNext :list="model.optionDetail.options" :group="'select' + props.serial" 
                 animation="500" handle=".Sort">
                 <transition-group>
                     <el-row class="selectOption" v-for="i in model.optionDetail.options.length" :key="i">

@@ -9,7 +9,7 @@ import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import { ElMessage } from 'element-plus';
 import { VueDraggableNext } from 'vue-draggable-next'
-import { QuestionInstance,selectQ,textQ,describeQ,Department } from './newProjectType';
+import * as Types from './newProjectType';
 import { getDepartments } from './newProjectApi'
 import { useRouter } from 'vue-router'
 const router = useRouter();
@@ -34,9 +34,10 @@ const groups = ref([
 const groupsIdCount = ref(1)
 const gradeSelectStart = ref('')
 const gradeSelectEnd = ref('')
+const timeQuest = ref<Types.timeQ>({title:'您倾向于什么时间参加面试',time:[]})
 const campus = ref([])
 const identity = ref([])
-const allDepartments = ref<Department[]>([]);  
+const allDepartments = ref<Types.Department[]>([]);  
 onMounted(async () => {  
     try {  
     const departments = await getDepartments();  
@@ -71,9 +72,8 @@ const addGroup = () => {
     groupsIdCount.value++;
 }
 
-// 创建一个数组来存储组件的引用  
-const questionRefs = ref<QuestionInstance[]>([]); 
-// 定义子组件实例的类型  
+const questionRefs = ref<Types.QuestionInstance[]>([]); 
+
 const deleteGroup = (index:number) => {
     if(groups.value.length == 1){
         ElMessage.warning('必须保留一个组别！')
@@ -91,7 +91,7 @@ const deleteGroup = (index:number) => {
 const addNewQuestion = () => {
     switch(newQuestionType.value){
         case 'd':
-            let d:describeQ={
+            let d:Types.describeQ={
                 type:'d',
                 title:'',
                 required:false,
@@ -101,7 +101,7 @@ const addNewQuestion = () => {
             addDialogVisible.value = false;
             return
         case 't':
-            let t:textQ={
+            let t:Types.textQ={
                 type:'t',
                 title:'',
                 required:false,
@@ -111,7 +111,7 @@ const addNewQuestion = () => {
             addDialogVisible.value = false;
             return
         case 's':
-            let s:selectQ={
+            let s:Types.selectQ={
                 type:'s',
                 title:'',
                 optionDetail:{
@@ -155,7 +155,13 @@ const saveProject = () => {
 const gotoPreview = () => {
     const data = {
         title:title.value,
-        brief:brief.value
+        brief:brief.value,
+        groups:groups.value,
+        timeQuestTitle:timeQuest.value.title,
+        timeQuestTime:timeQuest.value.time,
+        titleColor:titleColor.value,
+        backColor:backColor.value,
+        Questions:Questions.value,
     }
     const url = router.resolve(
         { 
@@ -413,7 +419,7 @@ const gotoPreview = () => {
                 </el-row>
                 <el-form label-position="left" class="blockForm">
                     <el-space  direction="vertical" alignment="left" class="space">
-                        <timeGroup></timeGroup>
+                        <timeGroup v-model="timeQuest"></timeGroup>
                         <VueDraggableNext :list="Questions" group="name" 
                         animation="500" handle=".questionSort">
                             <transition-group>
@@ -456,6 +462,7 @@ const gotoPreview = () => {
                         </div>
                         </template>
                     </el-dialog>
+                    {{ Questions }}
                 </el-form>
             </div>
             <div class="blockContainer">
