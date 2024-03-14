@@ -1,9 +1,9 @@
 <script setup lang="ts">
-    import { getCurrentInstance,ref } from 'vue';
+    import { inject,ref } from 'vue';
     import { setCookie } from '@/utils/cookie'
     import { useRouter } from 'vue-router'
     import http from '@/utils/http'
-    const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+    const TWT:string = inject()?.appContext.config.globalProperties.$TWT;
     const router = useRouter();
     const account = ref('')
     const password = ref('')

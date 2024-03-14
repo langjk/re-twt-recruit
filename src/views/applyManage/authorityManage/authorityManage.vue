@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { getCurrentInstance,ref} from 'vue';
+import { inject,ref} from 'vue';
 import sideBar from '@/components/applyManage/sideBar.vue'
 import type { author } from './authorType';
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 const tableData:author[]=[
     {
         name:'路人甲',

@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { getCurrentInstance} from 'vue';
+import { inject} from 'vue';
 import sideBar from '@/components/applyManage/sideBar.vue'
 import projectBar from '@/components/applyManage/projectManage/projectBar.vue'
 import type { Bar } from './projectBarType'
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 const projectData:Bar[] = [
     {
         title:'测1111111111111111111111111111试',

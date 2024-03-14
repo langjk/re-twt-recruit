@@ -5,15 +5,28 @@ export default {
 </script>
 
 <script setup lang="ts" name="Menu">
-import { getCurrentInstance } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { getCookie,delCookie } from '@/utils/cookie';
 import { userDetail } from '@/types/userDetail';
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter();
 const route = useRoute();
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
-
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT=ref('')
+const lightTWT=ref('')
+TWT.value = globalVars.TWT;
+lightTWT.value =globalVars.lightTWT;
+watch(() => globalVars.TWT, (newValue) => {
+    TWT.value = newValue
+})
+watch(() => globalVars.lightTWT, (newValue) => {
+    lightTWT.value =newValue
+})
 const UserDetail: userDetail = {name:'未登录',uid:0,nickname:'未登录'}
 var userCookie = getCookie('nickname');
 if(userCookie){
@@ -44,7 +57,6 @@ const checkLogin = () => {
     mode="horizontal"
     :default-active="'/' + route.path.split('/')[1]"
     :router="true"
-    :active-text-color="TWT"
     >
         <el-row class="TWT">
             <img src="@/assets/logo.png" alt="twt">
@@ -102,5 +114,13 @@ const checkLogin = () => {
 .blue {
     color: v-bind(TWT);
     font-weight: bold;
+}
+:deep(.el-menu--horizontal>.el-menu-item.is-active){
+    color:v-bind(TWT) !important;
+}
+:deep(.el-menu-item.is-active){
+    background-color:v-bind(lightTWT) !important;
+    color:v-bind(TWT) !important;
+    border-bottom:1px solid v-bind(TWT) !important;
 }
 </style>

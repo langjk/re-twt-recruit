@@ -4,10 +4,15 @@ export default {
 }
 </script>
 <script setup lang="ts" name="appSideBar">
-import { getCurrentInstance } from 'vue';
+import { inject } from 'vue';
 import { useRoute } from 'vue-router'
 
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 const route = useRoute();
 </script>
 

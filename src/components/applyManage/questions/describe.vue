@@ -4,9 +4,14 @@ export default {
 }
 </script>
 <script setup lang="ts" name="describe">
-import { getCurrentInstance,ref } from 'vue';
+import { inject,ref } from 'vue';
 import { describeQ } from '@/views/applyManage/newProject/newProjectType';
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 const props = defineProps({
     serial: { type: Number, required: true },
     groups:{ type : Array as () => Array<{ [key: string]: string | number }>,required:true }

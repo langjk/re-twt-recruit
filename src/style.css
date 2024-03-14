@@ -4,7 +4,6 @@ body {
   font-family: 'Microsoft YaHei';
   min-width: 600px;
 }
-.el-menu-item.is-active { background-color:#E3F5FD!important; }
 .el-form {
   --el-form-label-font-size: 16px !important;
 }

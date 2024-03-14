@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance,ref, onMounted } from 'vue';
+import { inject,ref, onMounted } from 'vue';
 import sideBar from '@/components/applyManage/sideBar.vue'
 import timeGroup from '@/components/applyManage/questions/time.vue'
 import textQuest from '@/components/applyManage/questions/text.vue'
@@ -12,8 +12,15 @@ import { VueDraggableNext } from 'vue-draggable-next'
 import * as Types from './newProjectType';
 import { getDepartments } from './newProjectApi'
 import { useRouter } from 'vue-router'
+import http from '@/utils/http'
+import { styleType } from 'element-plus/es/components/table-v2/src/common';
 const router = useRouter();
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 const title = ref('')
 const filterMethod = ref("0")
 const endTime = ref('')
@@ -134,23 +141,71 @@ const handleDelete = (serial:number) => {
 const disabledDate = (time: Date) => {
     return time.getTime() < Date.now()
 }
-const saveProject = () => {
+const checkData = () =>{
     //开始恐怖的整理项目格式和检查遗漏
     //检查空组
     if(title.value == ''){
         ElMessage.warning('项目标题为空！')
-        return
+        return false
     }
     groups.value.forEach((group,index) => {
         if(group.label == ''){
             ElMessage.warning('第'+(index+1)+'个组别名称为空！')
-            return
+            return false
         }
     })
     if(endTime.value == ''){
         ElMessage.warning('截止日期为空！')
-        return
+        return false
     }
+    if(contact.value == ''){
+        ElMessage.warning('联系方式为空！')
+        return false
+    }
+    if(brief.value == ''){
+        ElMessage.warning('简介为空！')
+        return false
+    }
+    if(backColor.value == '')
+        backColor.value = '#00a1e9'
+    if(titleColor.value == '')
+        titleColor.value = '#FFFFFF'
+    let timeCheckFlag = true
+    for(let i = 0;i<timeQuest.value.time.length;i++){
+        if(timeQuest.value.time[i] == 1)
+            timeCheckFlag = false
+    }
+    if(timeCheckFlag){
+        ElMessage.warning('请选择面试时间！')
+        return false
+    }
+}
+const saveProject = () => {
+    checkData();
+    http.post("/v1/child/project",
+        {
+            title:title.value,
+            clubId:3,
+            groups:JSON.stringify(groups.value), 
+            covers:coverUrl.value,
+            backgrounds:backUrl.value,
+            scale:1,
+            questions:JSON.stringify(Questions.value),
+            brief:brief.value,
+            contact:contact.value,
+            filterMethod:filterMethod.value,
+            titleColor:titleColor.value,
+            backColor:backColor.value,
+            pageMethod:pageMethod.value,
+            circleMethod:circleMethod.value,
+            lockMethod:lockMethod.value,
+            endTime:endTime.value
+        })
+        .then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                ElMessage.success('新建项目成功！');
+            }
+        });
 }
 const gotoPreview = () => {
     const data = {
@@ -462,7 +517,6 @@ const gotoPreview = () => {
                         </div>
                         </template>
                     </el-dialog>
-                    {{ Questions }}
                 </el-form>
             </div>
             <div class="blockContainer">

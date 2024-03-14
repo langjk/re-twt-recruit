@@ -1,26 +1,30 @@
 <script lang="ts" setup>
-import { getCurrentInstance,ref,onMounted } from 'vue';
+import { inject,ref,onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { MdPreview } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
-import textQuest from '@/components/applyManage/questions/text.vue'
-import selectQuest from '@/components/applyManage/questions/select.vue'
-import describeQuest from '@/components/applyManage/questions/describe.vue' 
 const route = useRoute();
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 const data = JSON.parse(route.params.data as string);
-const answers = ref([])
+const answers = ref<any[][]>([]);
 const fetchGroup = () => {
-    data.groups.forEach(ref => {
+    data.groups.forEach((group: any) => {
         answers.value.push([])
     });
 }
-
 const titleColor = data.titleColor;
 const backColor = data.backColor;
 const groupSelect = ref<string[]>([]);
 const checkGroupSelect = (label:string) => {
     return groupSelect.value.includes(label);
+}
+const checkQuestGroup = (id:number,groups:number[]) => {
+    return groups.includes(id);
 }
 onMounted(async () => {  
     try {  
@@ -83,7 +87,7 @@ onMounted(async () => {
             </el-row>
             <div class="inforContainer">
                 <div class="questTitle">
-                    1.组别
+                    1.请选择想报名的组别
                 </div>
                 <el-checkbox-group class="groupButtonContainer" v-model="groupSelect">
                     <el-checkbox
@@ -134,41 +138,47 @@ onMounted(async () => {
                     </el-tab-pane>
                 </el-tabs>
             </div>
-            <dic class="inforContainer">
+            <div class="inforContainer">
                 <el-collapse class="groupCol">
                     <div  v-for="group in data.groups" :key="group.id" >
                         <el-collapse-item :title="group.label+' 问卷'" 
                         v-if="checkGroupSelect(group.label)">
                             <div class="questionContainer">
                                 <div v-for="(item,index) in data.Questions" :key="index" > 
-                                    <div class="questionTitle">
-                                        {{index+1}}. {{ item.title }}
-                                    </div>
-                                    <div v-if="item.type == 't'">
-                                        <el-input
-                                        v-model="answers[group.id][index]"
-                                        class="textInput"
-                                        :autosize="{ minRows: 2, maxRows: 4 }"
-                                        type="textarea"
-                                        placeholder="请简述你的回答"
-                                        />
-                                    </div>
-                                    <div v-if="item.type == 's'">
-                                        <el-checkbox-group class="selectInput" v-model="answers[group.id][index]">
-                                            <el-checkbox
-                                                v-for="option in item.optionDetail.options"
-                                                :key="option.id"
-                                                :label="option.label"
-                                                :value="option.id"
-                                                ></el-checkbox>
-                                        </el-checkbox-group>
+                                    <div v-if="checkQuestGroup(group.id,item.groups)">
+                                        <div class="questionTitle">
+                                            {{ item.title }}
+                                        </div>
+                                        <div v-if="item.type == 't'">
+                                            <el-input
+                                            v-model="answers[group.id][index]"
+                                            class="textInput"
+                                            :autosize="{ minRows: 2, maxRows: 4 }"
+                                            type="textarea"
+                                            placeholder="请简述你的回答"
+                                            />
+                                        </div>
+                                        <div v-if="item.type == 's'">
+                                            <div class="selectInput">
+                                                <el-checkbox-group v-model="answers[group.id][index]"
+                                                :min="item.optionDetail.minSelect" :max="item.optionDetail.maxSelect">
+                                                    <el-checkbox
+                                                        v-for="option in item.optionDetail.options"
+                                                        :key="option.id"
+                                                        :label="option.label"
+                                                        :value="option.id"
+                                                        ></el-checkbox>
+                                                </el-checkbox-group>
+                                                最少选{{ item.optionDetail.minSelect }}项,最多选{{ item.optionDetail.maxSelect }}项
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </el-collapse-item>
                     </div>
                 </el-collapse>
-            </dic>
+            </div>
         </div>
     </div>
 </template>
@@ -183,7 +193,6 @@ onMounted(async () => {
     justify-content: center;
     background-color:v-bind(backColor);
     min-height:100vh;
-
 }
 .warnDiv{
     width: 1200px;
@@ -262,6 +271,7 @@ onMounted(async () => {
 :deep(.el-tabs__nav){
     width:100%;
 }
+
 :deep(.el-tabs__content){
     padding:0;
 }
@@ -275,7 +285,6 @@ onMounted(async () => {
 }
 .groupCol{
     width:1128px;
-    margin-left:40px;
 }
 :deep(.el-collapse-item__header){
     background-color:rgb(245,247,250);
@@ -286,6 +295,10 @@ onMounted(async () => {
     box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
     border-radius: 0 0 10px 10px; 
     padding-top:10px;
+}
+:deep(.el-collapse-item__content){
+    padding:0;
+    padding-bottom:10px;
 }
 .questionContainer{
     margin-left:20px;

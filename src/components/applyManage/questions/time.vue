@@ -4,9 +4,14 @@ export default {
 }
 </script>
 <script setup lang="ts" name="timeGroup">
-import { getCurrentInstance,ref } from 'vue';
+import { inject,ref } from 'vue';
 import { timeQ } from '@/views/applyManage/newProject/newProjectType';
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 // const timeGroupOptions = [
 //     {
 //         value:'0',

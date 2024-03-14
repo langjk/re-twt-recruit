@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { getCurrentInstance} from 'vue';
+import { inject} from 'vue';
 import { useRouter } from 'vue-router'
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 const router = useRouter();
 
 const handleOrg = () => {

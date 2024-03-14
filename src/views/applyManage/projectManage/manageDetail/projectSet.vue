@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import { getCurrentInstance,ref } from 'vue';
+import { inject,ref } from 'vue';
 import projectSideBar from '@/components/applyManage/projectManage/projectSideBar.vue';
 import { MdEditor } from 'md-editor-v3';
 import { ElMessage } from 'element-plus';
 import 'md-editor-v3/lib/style.css';
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
 const title = ref('')
 const filterMethod = ref("0")
 const endTime = ref('')

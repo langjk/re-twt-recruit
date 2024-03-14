@@ -5,11 +5,16 @@ export default {
 </script>
 
 <script setup lang="ts" name="recruitList">
-import { getCurrentInstance } from 'vue';
+import { inject } from 'vue';
 import { Recruit } from './home.types'
 
-const lightTWT:string = getCurrentInstance()?.appContext.config.globalProperties.$lightTWT;
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
+const lightTWT:string =globalVars.lightTWT;
 
 interface Props {
     title: string

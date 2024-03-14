@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, reactive } from 'vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import App from './App.vue'
@@ -15,8 +15,13 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 
 //主题色
-app.config.globalProperties.$lightTWT = '#E3F5FD'; 
-app.config.globalProperties.$TWT = '#00a1e9'; 
+
+const globalVars = reactive({
+  TWT: '#00a1e9',
+  lightTWT: '#E3F5FD'
+})
+
+app.provide('globalVars', globalVars)
 app.config.globalProperties.$orgId = 773804030; 
 
 app.use(ElementPlus, {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getCurrentInstance } from 'vue';
+import { inject } from 'vue';
 import recruitList from './recruitsList.vue';
 import { Recruit } from './home.types';
 import http from '@/utils/http'
@@ -44,9 +44,13 @@ const recruit:Recruit[]=[
         people:114
     },
 ]
-
-const lightTWT:string = getCurrentInstance()?.appContext.config.globalProperties.$lightTWT;
-const TWT:string = getCurrentInstance()?.appContext.config.globalProperties.$TWT;
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
+const lightTWT:string =globalVars.lightTWT;
 lightTWT;TWT
 
 </script>
