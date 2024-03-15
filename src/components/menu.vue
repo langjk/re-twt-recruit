@@ -5,11 +5,10 @@ export default {
 </script>
 
 <script setup lang="ts" name="Menu">
-import { inject, ref, watch } from 'vue';
-import { getCookie,delCookie } from '@/utils/cookie';
-import { userDetail } from '@/types/userDetail';
+import { inject, ref, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
-
+import { useStore } from 'vuex';
+const store = useStore(); 
 const router = useRouter();
 const route = useRoute();
 type gloVar = {
@@ -27,22 +26,18 @@ watch(() => globalVars.TWT, (newValue) => {
 watch(() => globalVars.lightTWT, (newValue) => {
     lightTWT.value =newValue
 })
-const UserDetail: userDetail = {name:'未登录',uid:0,nickname:'未登录'}
-var userCookie = getCookie('nickname');
-if(userCookie){
-    UserDetail.name = userCookie;
-}
-
+var  userName = localStorage.getItem('nickname')
+store.commit('SET_USER_INFO', userName);   
+const userInfo = computed(() => store.state.name);  
 const resetLogin = () => {
-    delCookie('token');
-    delCookie('nickname');
+    store.commit('SET_USER_INFO', '');
     router.push('/Login')
 }
 
 const checkLogin = () => {
-    if(!userCookie){
-        delCookie('token');
-        delCookie('nickname');
+    if(!userInfo){
+        localStorage.removeItem('token');
+        localStorage.removeItem('nickname');
         router.push('/Login');
     }
     else{
@@ -71,7 +66,8 @@ const checkLogin = () => {
             <template #title>
                 <el-icon><User /></el-icon>
                 <el-row class="mine">
-                    {{UserDetail.name}}</el-row>
+                    {{userInfo}}
+                </el-row>
             </template>
             <el-menu-item @click="checkLogin()">个人信息</el-menu-item>
             <el-menu-item index="/Login" @click="resetLogin()">退出登录</el-menu-item>

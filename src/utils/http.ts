@@ -6,8 +6,12 @@ timeout: 5000,
 });
 
 instance.interceptors.request.use(
-(config): any => {
-    return config;
+(config): any => { 
+    config.headers['Content-Type'] = 'multipart/form-data';  
+    const token = localStorage.getItem('token');  
+    // 如果有token，添加到请求头部  
+    config.headers['Authorization'] = `${token}`;  
+    return config;  
 },
 (error) => {
     return Promise.reject(error);

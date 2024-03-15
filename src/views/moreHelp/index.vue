@@ -24,7 +24,7 @@ const changeLightColor = () => {
             <h1>主题颜色</h1>
             <div>
                 <el-color-picker v-model="color" @change="changeColor()" size="large" />
-                <el-color-picker v-model="lightcolor" @change="changeLightColor()" ssize="large" />
+                <el-color-picker v-model="lightcolor" @change="changeLightColor()" size="large" />
             </div>
         </div>
     </div>

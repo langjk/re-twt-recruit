@@ -8,12 +8,11 @@ import describeQuest from '@/components/applyManage/questions/describe.vue'
 import { MdEditor } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
 import { ElMessage } from 'element-plus';
-import { VueDraggableNext } from 'vue-draggable-next'
+import { VueDraggableNext } from 'vue-draggable-next';
 import * as Types from './newProjectType';
-import { getDepartments } from './newProjectApi'
-import { useRouter } from 'vue-router'
-import http from '@/utils/http'
-import { styleType } from 'element-plus/es/components/table-v2/src/common';
+import { getDepartments } from './newProjectApi';
+import { useRouter } from 'vue-router';
+import http from '@/utils/http';
 const router = useRouter();
 type gloVar = {
     TWT:string,
@@ -26,8 +25,8 @@ const filterMethod = ref("0")
 const endTime = ref('')
 const contact = ref('')
 const brief= ref('')
-const coverUrl = ref('')
-const backUrl = ref('')
+const coverUrl = ref(' ')
+const backUrl = ref(' ')
 const titleColor = ref('#FFFFFF')
 const backColor = ref('#00a1e9')
 const pageMethod = ref('25%')
@@ -64,14 +63,14 @@ const beforeUpload = (file:any) => {
             ElMessage.error('上传图片大小不能超过 10MB!');
         }
         return isJPG && isLt2M;
-    }
+}
 const handleCoverUpload = (response: any) => 
 {
     coverUrl.value = 'http://43.138.43.34:9925' + response.result
 }
 const handleBackUpload = (response: any) => 
 {
-    backUrl.value = 'http://43.138.43.34:9925' + response.results
+    backUrl.value = 'http://43.138.43.34:9925' + response.result
 }
 const addGroup = () => {
     let newGroup = {label:'',id:groupsIdCount.value}
@@ -180,17 +179,39 @@ const checkData = () =>{
         return false
     }
 }
-const saveProject = () => {
+const saveProject = async () => {
     checkData();
+    let groupString = ''
+    let questString = JSON.parse(JSON.stringify(Questions.value))
+    for(let i = 0;i<groups.value.length;i++){
+        groupString = groupString + groups.value[i].label + ','
+    }
+    groupString = groupString.slice(0,groupString.length-1)
+    await http.post("/v1/child/groups",{
+        groups:groupString,
+        clubId:3
+    }).then((res:{code:number,result:any}) => {
+        if(res.code == 200){
+            for(let j = 0;j<questString.length;j++){
+                for(let k = 0;k<questString[j].groups.length;k++)
+                    questString[j].groups[k] = res.result[k].groupId
+            }
+            groupString = ''
+            for(let l = 0;l<res.result.length;l++)
+                groupString = groupString + res.result[l].groupId + ','
+            groupString = groupString.slice(0,groupString.length-1)
+        }
+    })
+    let endTimeString = JSON.stringify(endTime.value).slice(1,11)
     http.post("/v1/child/project",
         {
             title:title.value,
             clubId:3,
-            groups:JSON.stringify(groups.value), 
+            groups:groupString, 
             covers:coverUrl.value,
             backgrounds:backUrl.value,
             scale:1,
-            questions:JSON.stringify(Questions.value),
+            questions:JSON.stringify(questString),
             brief:brief.value,
             contact:contact.value,
             filterMethod:filterMethod.value,
@@ -198,8 +219,9 @@ const saveProject = () => {
             backColor:backColor.value,
             pageMethod:pageMethod.value,
             circleMethod:circleMethod.value,
-            lockMethod:lockMethod.value,
-            endTime:endTime.value
+            slideLock:lockMethod.value,
+            endTime:endTimeString,
+            rules:'',
         })
         .then((res:{code:number,result:any})=>{
             if(res.code == 200){
@@ -472,7 +494,7 @@ const gotoPreview = () => {
                     <span></span>
                     申请表单
                 </el-row>
-                <el-form label-position="left" class="blockForm">
+                <el-form label-position="left" class="blockForm">{{ Questions }}
                     <el-space  direction="vertical" alignment="left" class="space">
                         <timeGroup v-model="timeQuest"></timeGroup>
                         <VueDraggableNext :list="Questions" group="name" 

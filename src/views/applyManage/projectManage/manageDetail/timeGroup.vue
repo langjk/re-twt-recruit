@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, inject} from 'vue';
+import { inject} from 'vue';
 import projectSideBar from '@/components/applyManage/projectManage/projectSideBar.vue'
 type gloVar = {
     TWT:string,

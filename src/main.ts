@@ -6,6 +6,7 @@ import { useRouter } from '@/router'
 import './style.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import zhCn from "element-plus/es/locale/lang/zh-cn";
+import store from './store'
 
 const app = createApp(App)
 
@@ -23,7 +24,7 @@ const globalVars = reactive({
 
 app.provide('globalVars', globalVars)
 app.config.globalProperties.$orgId = 773804030; 
-
+app.use(store)
 app.use(ElementPlus, {
   locale: zhCn,
 })

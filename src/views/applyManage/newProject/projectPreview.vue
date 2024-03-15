@@ -11,20 +11,37 @@ type gloVar = {
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
 const data = JSON.parse(route.params.data as string);
-const answers = ref<any[][]>([]);
+type Answer = {
+    questionId:number,
+    questionAnswer:any
+}
+type uploadAnswer = {
+    groupId:number,
+    quest:Answer[]
+}
+const answers = ref<uploadAnswer[]>([]);
+const questions:any = ref([]);
 const fetchGroup = () => {
-    data.groups.forEach((group: any) => {
-        answers.value.push([])
-    });
+    for(let i = 0;i<data.groups.length;i++){
+        let uploadAnswer:uploadAnswer = {groupId:0,quest:[]}
+        questions.value.push([]);
+        for(let j = 0;j<data.Questions.length;j++){
+            if(data.Questions[j].groups.includes(i)){
+                if(data.Questions[j].type == 's')
+                    uploadAnswer.quest.push({questionId:0,questionAnswer:[]})
+                else
+                    uploadAnswer.quest.push({questionId:0,questionAnswer:''})
+                questions.value[i].push(data.Questions[j])
+            }
+        }
+        answers.value.push(uploadAnswer)
+    }
 }
 const titleColor = data.titleColor;
 const backColor = data.backColor;
 const groupSelect = ref<string[]>([]);
 const checkGroupSelect = (label:string) => {
     return groupSelect.value.includes(label);
-}
-const checkQuestGroup = (id:number,groups:number[]) => {
-    return groups.includes(id);
 }
 onMounted(async () => {  
     try {  
@@ -140,18 +157,17 @@ onMounted(async () => {
             </div>
             <div class="inforContainer">
                 <el-collapse class="groupCol">
-                    <div  v-for="group in data.groups" :key="group.id" >
+                    <div  v-for="(group,groupindex) in data.groups" :key="group.id" >
                         <el-collapse-item :title="group.label+' 问卷'" 
                         v-if="checkGroupSelect(group.label)">
                             <div class="questionContainer">
-                                <div v-for="(item,index) in data.Questions" :key="index" > 
-                                    <div v-if="checkQuestGroup(group.id,item.groups)">
+                                <div v-for="(item,index) in questions[groupindex]" :key="index" > 
                                         <div class="questionTitle">
                                             {{ item.title }}
                                         </div>
                                         <div v-if="item.type == 't'">
                                             <el-input
-                                            v-model="answers[group.id][index]"
+                                            v-model="answers[groupindex].quest[index].questionAnswer"
                                             class="textInput"
                                             :autosize="{ minRows: 2, maxRows: 4 }"
                                             type="textarea"
@@ -160,7 +176,7 @@ onMounted(async () => {
                                         </div>
                                         <div v-if="item.type == 's'">
                                             <div class="selectInput">
-                                                <el-checkbox-group v-model="answers[group.id][index]"
+                                                <el-checkbox-group v-model="answers[groupindex].quest[index].questionAnswer"
                                                 :min="item.optionDetail.minSelect" :max="item.optionDetail.maxSelect">
                                                     <el-checkbox
                                                         v-for="option in item.optionDetail.options"
@@ -172,7 +188,6 @@ onMounted(async () => {
                                                 最少选{{ item.optionDetail.minSelect }}项,最多选{{ item.optionDetail.maxSelect }}项
                                             </div>
                                         </div>
-                                    </div>
                                 </div>
                             </div>
                         </el-collapse-item>

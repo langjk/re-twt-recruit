@@ -1,9 +1,15 @@
 <script setup lang="ts">
     import { inject,ref } from 'vue';
-    import { setCookie } from '@/utils/cookie'
     import { useRouter } from 'vue-router'
     import http from '@/utils/http'
-    const TWT:string = inject()?.appContext.config.globalProperties.$TWT;
+    import { useStore } from 'vuex';
+    const store = useStore(); 
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT:string = globalVars.TWT;
     const router = useRouter();
     const account = ref('')
     const password = ref('')
@@ -12,10 +18,11 @@
         http.post("/v1/user/login",
         {account:account.value,password:password.value, })
         .then((res:{code:number,result:any})=>{
-            if(res.code == 200){
-                setCookie('token',res.result.token,7);
-                setCookie('nickname',res.result.nickname,7);
-                setCookie('usertype',res.result.nickname,7);
+            if(res.code == 200){ 
+                store.commit('SET_USER_INFO', res.result.name); 
+                localStorage.setItem('token', res.result.token);
+                localStorage.setItem('nickname', res.result.name);
+                localStorage.setItem('accountType', res.result.accountType);
                 router.push("/");
             }
         });
@@ -122,6 +129,7 @@
 .reg .text{
     font-size: 14px;
     margin-top:15px;
+    border:none !important; 
 }
 .register{
     color: v-bind(TWT);
