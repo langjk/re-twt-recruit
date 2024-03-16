@@ -5,9 +5,22 @@ export default {
 </script>
 <script setup lang="ts" name="projectBar">
 import type { Bar } from '@/views/applyManage/projectManage/projectBarType';
+import { useRouter } from 'vue-router';
+const router = useRouter()
 const props = defineProps<{
     data:Bar
 }>()
+const gotoProject = () => {
+    const url = router.resolve(
+        { 
+            name: 'projectdetail', 
+            params: { 
+                projectId:props.data.projectId
+            } 
+        }
+    ).href;
+    window.open(url, '_blank');
+}
 </script>
 <template>
     <el-row class="barContainer">
@@ -18,17 +31,19 @@ const props = defineProps<{
         <el-col :span="12" class="text">
             <div class="title">{{props.data.title}}</div>
             <el-row>
-                <div :class="props.data.status==1?'isRecruit':'stopRecruit'">
-                    {{ props.data.status==1?'正在招募':'停止招募' }}
+                <div :class="props.data.status<2?'isRecruit':'stopRecruit'">
+                    {{ props.data.status<2?(props.data.status==0 ? '正在招募/公开' : '正在招募/非公开')
+                    :(props.data.status==2 ? '停止招募/公开' : '停止招募/非公开') }}
                 </div>
-                <div class="date">{{props.data.date}}</div>
+                <div class="date">{{props.data.endTime.slice(0,10)}}</div>
             </el-row>
         </el-col>
         <el-col :span="4" class="text">
-            <div class="member">{{props.data.member}}人参与</div>
+            <div class="member">{{props.data.applicationNum}}人参与</div>
         </el-col>
         <el-col :span="5" class="buttonContainer">
-            <el-button class="button" type="primary">管理</el-button>
+            <el-button class="button" type="primary" @click="gotoProject()
+            ">管理</el-button>
             <el-button class="button" type="danger">删除</el-button>
         </el-col>
     </el-row>

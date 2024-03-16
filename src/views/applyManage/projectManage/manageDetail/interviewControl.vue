@@ -12,7 +12,7 @@ const TWT:string = globalVars.TWT;
 <template>
     <el-container>
         <el-aside>
-            <projectSideBar :title="'测试项目'" :status="1"></projectSideBar>
+            <projectSideBar></projectSideBar>
         </el-aside>
         <el-main style="padding:0;overflow:hidden">
             <el-space  direction="vertical" alignment="left" class="space">

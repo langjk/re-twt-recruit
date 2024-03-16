@@ -23,6 +23,10 @@ const TWT:string = globalVars.TWT;
                 localStorage.setItem('token', res.result.token);
                 localStorage.setItem('nickname', res.result.name);
                 localStorage.setItem('accountType', res.result.accountType);
+                if(res.result.accountType > 1){
+                    localStorage.setItem('clubId',res.result.clubId)
+                    localStorage.setItem('scale',res.result.scale)
+                }
                 router.push("/");
             }
         });

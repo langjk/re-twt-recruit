@@ -1,6 +1,6 @@
 export type author = {
     name:string,
-    number:number,
-    role:number,
+    uid:number,
+    role:string,
 
 }

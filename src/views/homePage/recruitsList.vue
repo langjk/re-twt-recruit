@@ -30,22 +30,21 @@ const props = defineProps<Props>()
         {{props.title}}
     </el-row>
     <el-row class="recruitContainer">
-        <div v-for="(items,index) in recruit.slice(0,5)" :key="index" class="recruit">
+        <div v-for="(items,index) in recruit" :key="index" class="recruit">
             <div class="img">
-                <img :src="items.img" />
+                <img style="width:100%" :src="items.cover" />
             </div>
             <div class="title">
                 {{ items.title }}
             </div>  
             <div class="org">
-                {{ items.organization }}
+                {{ items.clubName }}
             </div>
             <div class="people">
-                {{ items.people }}人参加
+                {{ items.applicationNum }}人参加
             </div>
         </div>
     </el-row>
-    <el-button class="button">查看更多</el-button>
 </template>
 <style scoped>
 .recruitTitle{
@@ -75,6 +74,7 @@ const props = defineProps<Props>()
 .recruit .img{
     height:180px;
     background-color: v-bind(lightTWT);
+    overflow: hidden;
 }
 .recruit .title{
     width: 118px;
@@ -95,14 +95,5 @@ const props = defineProps<Props>()
     margin:63px 0 0 23px;
     font-size: 14px;
     color: #727272;
-}
-.button{
-    margin:48px 0 0 720px;
-    width:480px;
-    height:48px;
-    background: v-bind(TWT);
-    color:white;
-    font-size:18px;
-    font-weight: 400;
 }
 </style>

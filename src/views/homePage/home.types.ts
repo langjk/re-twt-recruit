@@ -1,6 +1,6 @@
 export type Recruit = {
-    img?:string;
+    cover?:string;
     title: string;
-    organization: string;
-    people: number;
+    clubName: string;
+    applicationNum: number;
   };

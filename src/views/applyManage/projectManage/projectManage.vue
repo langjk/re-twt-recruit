@@ -1,34 +1,23 @@
 <script setup lang="ts">
-import { inject} from 'vue';
+import { inject, ref} from 'vue';
 import sideBar from '@/components/applyManage/sideBar.vue'
 import projectBar from '@/components/applyManage/projectManage/projectBar.vue'
 import type { Bar } from './projectBarType'
+import http from '@/utils/http'
 type gloVar = {
     TWT:string,
     lightTWT:string
 }
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
-const projectData:Bar[] = [
-    {
-        title:'测1111111111111111111111111111试',
-        status:1,
-        member:20,
-        date:'2020-1-20'
-    },
-    {
-        title:'测21121试',
-        status:2,
-        member:23,
-        date:'2021-1-20'
-    },
-    {
-        title:'测31111试',
-        status:2,
-        member:4,
-        date:'2024-1-20'
-    },
-]
+const projectData= ref<Bar[]>([])
+let clubId = localStorage.getItem('clubId')
+http.get("/v1/staff/project/all", {clubId:clubId
+        }).then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                projectData.value = res.result
+            }
+        });
 </script>
 
 <template>

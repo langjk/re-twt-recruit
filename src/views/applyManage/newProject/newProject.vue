@@ -44,6 +44,7 @@ const timeQuest = ref<Types.timeQ>({title:'您倾向于什么时间参加面试'
 const campus = ref([])
 const identity = ref([])
 const allDepartments = ref<Types.Department[]>([]);  
+var baseurl = import.meta.env.VITE_API_URL
 onMounted(async () => {  
     try {  
     const departments = await getDepartments();  
@@ -66,11 +67,11 @@ const beforeUpload = (file:any) => {
 }
 const handleCoverUpload = (response: any) => 
 {
-    coverUrl.value = 'http://43.138.43.34:9925' + response.result
+    coverUrl.value = import.meta.env.VITE_API_URL + response.result
 }
 const handleBackUpload = (response: any) => 
 {
-    backUrl.value = 'http://43.138.43.34:9925' + response.result
+    backUrl.value = import.meta.env.VITE_API_URL + response.result
 }
 const addGroup = () => {
     let newGroup = {label:'',id:groupsIdCount.value}
@@ -203,14 +204,17 @@ const saveProject = async () => {
         }
     })
     let endTimeString = JSON.stringify(endTime.value).slice(1,11)
+    let scale = localStorage.getItem('scale')
+    let clubId = localStorage.getItem('clubId')
+    console.log(scale,clubId)
     http.post("/v1/child/project",
         {
             title:title.value,
-            clubId:3,
+            clubId:clubId,
             groups:groupString, 
             covers:coverUrl.value,
             backgrounds:backUrl.value,
-            scale:1,
+            scale:scale,
             questions:JSON.stringify(questString),
             brief:brief.value,
             contact:contact.value,
@@ -379,7 +383,7 @@ const gotoPreview = () => {
                         <el-form-item label="封面图">
                             <div class="imgUploadContainer">
                                 <el-upload 
-                                action="http://43.138.43.34:9925/v1/user/img"
+                                :action="baseurl + '/v1/user/img'"
                                 accept="image/jpeg,image/png"
                                 :before-upload="beforeUpload"
                                 :show-file-list="false"
@@ -424,7 +428,7 @@ const gotoPreview = () => {
                         <el-form-item label="背景图">
                             <div class="imgUploadContainer">
                                 <el-upload 
-                                action="http://43.138.43.34:9925/v1/user/img"
+                                :action="baseurl + '/v1/user/img'"
                                 accept="image/jpeg,image/png"
                                 :before-upload="beforeUpload"
                                 :show-file-list="false"

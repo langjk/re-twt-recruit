@@ -4,10 +4,14 @@ import projectSideBar from '@/components/applyManage/projectManage/projectSideBa
 import { MdEditor } from 'md-editor-v3';
 import { ElMessage } from 'element-plus';
 import 'md-editor-v3/lib/style.css';
+import { useRoute } from 'vue-router';
+import http from '@/utils/http'
+const route = useRoute();
 type gloVar = {
     TWT:string,
     lightTWT:string
 }
+var projectId = route.params.projectId
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
 const title = ref('')
@@ -22,6 +26,24 @@ const backColor = ref('#00a1e9')
 const pageMethod = ref('25%')
 const circleMethod = ref('repeat')
 const lockMethod = ref('fixed')
+var baseurl = import.meta.env.VITE_API_URL
+http.get("/v1/user/project", {projectId:projectId
+        }).then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                title.value = res.result.title
+                filterMethod.value = res.result.filterMethod
+                endTime.value = res.result.endTime
+                contact.value = res.result.contact
+                brief.value = res.result.brief
+                coverUrl.value = res.result.cover
+                backUrl.value = res.result.background
+                titleColor.value = res.result.titleColor
+                backColor.value = res.result.backColor
+                pageMethod.value = res.result.pageMethod
+                circleMethod.value = res.result.circleMethod
+                lockMethod.value = res.result.slideLock
+            }
+        });
 const disabledDate = (time: Date) => {
     return time.getTime() < Date.now()
 }
@@ -38,18 +60,18 @@ const beforeUpload = (file:any) => {
     }
 const handleCoverUpload = (response: any) => 
 {
-    coverUrl.value = 'http://43.138.43.34:9925' + response.result
+    coverUrl.value = import.meta.env.VITE_API_URL + response.result
 }
 const handleBackUpload = (response: any) => 
 {
-    backUrl.value = 'http://43.138.43.34:9925' + response.results
+    backUrl.value = import.meta.env.VITE_API_URL + response.results
 }
 </script>
 
 <template>
     <el-container>
         <el-aside>
-            <projectSideBar :title="'测试项目'" :status="0"></projectSideBar>
+            <projectSideBar></projectSideBar>
         </el-aside> 
         <el-main style="padding:0;overflow:hidden">
             <div class="blockContainer">
@@ -144,7 +166,7 @@ const handleBackUpload = (response: any) =>
                         <el-form-item label="封面图">
                             <div class="imgUploadContainer">
                                 <el-upload 
-                                action="http://43.138.43.34:9925/v1/user/img"
+                                :action="baseurl + '/v1/user/img'"
                                 accept="image/jpeg,image/png"
                                 :before-upload="beforeUpload"
                                 :show-file-list="false"
@@ -189,7 +211,7 @@ const handleBackUpload = (response: any) =>
                         <el-form-item label="背景图">
                             <div class="imgUploadContainer">
                                 <el-upload 
-                                action="http://43.138.43.34:9925/v1/user/img"
+                                :action="baseurl + '/v1/user/img'"
                                 accept="image/jpeg,image/png"
                                 :before-upload="beforeUpload"
                                 :show-file-list="false"

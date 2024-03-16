@@ -4,8 +4,9 @@ export default {
 }
 </script>
 <script setup lang="ts" name="projectSideBar">
-import { inject } from 'vue';
+import { inject, ref } from 'vue';
 import { useRoute } from 'vue-router'
+import http from '@/utils/http'
 
 type gloVar = {
     TWT:string,
@@ -14,35 +15,42 @@ type gloVar = {
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
 const route = useRoute();
+var projectId = route.params.projectId
+console.log(projectId[2])
 
-const props = defineProps({
-    title: { type: String, required: true },
-    status:{ type: Number, required: true }
-})
+const title = ref('')
+const statusNum = ref(0)
 const status = ['正在招募-公开','正在招募-非公开','停止招募-公开','停止招募-非公开']
+http.get("/v1/user/project", {projectId:projectId
+        }).then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                title.value = res.result.title
+                statusNum.value = res.result.status
+            }
+        });
 </script>
 
 <template>
     <div class="container">
         <img src="@/assets/logo.png" class="avatar" />
-        <div class="nickName">{{props.title}}</div>
-        <div class="statusTitle" :style="(props.status<2)?('color:#93EA86'):('color:#DC5C5C')">{{status[props.status]}}</div> 
+        <div class="nickName">{{title}}</div>
+        <div class="statusTitle" :style="(statusNum<2)?('color:#93EA86'):('color:#DC5C5C')">{{status[statusNum]}}</div> 
         <el-divider style="width:75%;margin:0 auto" />
         <el-menu mode="vertical" class="sideMenu" :router="true" :default-active="route.path"
         :active-text-color="TWT"    >
-            <el-menu-item class="menuItem" index="/projectdetail/projectSet">
+            <el-menu-item class="menuItem" :index="'/projectdetail/'+projectId">
                 项目设定
             </el-menu-item>
-            <el-menu-item class="menuItem" index="/projectdetail/appManage">
+            <el-menu-item class="menuItem" :index="'/projectdetail/'+projectId+'/appManage'">
                 申请管理
             </el-menu-item>
-            <el-menu-item class="menuItem" index="/projectdetail/appInter">
+            <el-menu-item class="menuItem" :index="'/projectdetail/'+projectId+'/appInter'">
                 申请录入
             </el-menu-item>
-            <el-menu-item class="menuItem" index="/projectdetail/interviewControl">
+            <el-menu-item class="menuItem" :index="'/projectdetail/'+projectId+'/interviewControl'">
                 面试控制
             </el-menu-item>
-            <el-menu-item class="menuItem" index="/projectdetail/timeGroup">
+            <el-menu-item class="menuItem" :index="'/projectdetail/'+projectId+'/timeGroup'">
                 时间分组
             </el-menu-item>
         </el-menu>

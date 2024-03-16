@@ -55,36 +55,42 @@ const layOutsRoutes: RouteRecordRaw[] = [
                 component: () => import("@/views/myApplication/index.vue"),
             },
             {
-                path: 'projectdetail',
+                path: 'projectdetail/:projectId',
                 name: 'projectdetail',
                 component: () => import("@/views/applyManage/projectDetail.vue"),
                 children:[
                     {
                         path:'appInter',
                         name:'appInter',
-                        component:  () => import("@/views/applyManage/projectManage/manageDetail/appInter.vue")
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/appInter.vue"),
+                        props:true
                     },
                     {
                         path:'appManage',
                         name:'appManage',
-                        component:  () => import("@/views/applyManage/projectManage/manageDetail/appManage.vue")
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/appManage.vue"),
+                        props:true
                     },
                     {
                         path:'interviewControl',
                         name:'interviewControl',
-                        component:  () => import("@/views/applyManage/projectManage/manageDetail/interviewControl.vue")
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/interviewControl.vue"),
+                        props:true
                     },
                     {
-                        path:'projectSet',
+                        path:'',
                         name:'projectSet',
-                        component:  () => import("@/views/applyManage/projectManage/manageDetail/projectSet.vue")
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/projectSet.vue"),
+                        props:true
                     },
                     {
                         path:'timeGroup',
                         name:'timeGroup',
-                        component:  () => import("@/views/applyManage/projectManage/manageDetail/timeGroup.vue")
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/timeGroup.vue"),
+                        props:true
                     },
-                ]
+                ],
+                props:true
             },
             {
                 path:'projectPreview/:data',
