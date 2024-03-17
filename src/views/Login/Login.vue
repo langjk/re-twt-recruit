@@ -19,6 +19,7 @@ const TWT:string = globalVars.TWT;
         {account:account.value,password:password.value, })
         .then((res:{code:number,result:any})=>{
             if(res.code == 200){ 
+                store.commit('SET_USER_TYPE', res.result.accountType); 
                 localStorage.setItem('token', res.result.token);
                 localStorage.setItem('accountType', res.result.accountType);
                 if(res.result.accountType == 1){

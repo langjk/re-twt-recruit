@@ -26,7 +26,7 @@ watch(() => globalVars.TWT, (newValue) => {
 watch(() => globalVars.lightTWT, (newValue) => {
     lightTWT.value =newValue
 })
-var  userName = localStorage.getItem('nickname')
+var userName = localStorage.getItem('nickname')
 if(userName)
     store.commit('SET_USER_INFO', userName);   
 var userInfo = computed(() => store.state.name); 
@@ -34,11 +34,15 @@ const resetLogin = () => {
     store.commit('SET_USER_INFO', '');
     router.push('/Login');
 }
-
+var accountType = Number(localStorage.getItem('accountType'))
+if(accountType)
+    store.commit('SET_USER_TYPE', accountType); 
+var Type = computed(() => store.state.accountType);
 const checkLogin = () => {
     if(!userInfo){
         localStorage.removeItem('token');
         localStorage.removeItem('nickname');
+        localStorage.removeItem('accountType');
         router.push('/Login');
     }
     else{
@@ -60,7 +64,8 @@ const checkLogin = () => {
             <span class="title black">招募中心</span>
         </el-row>
         <el-menu-item class="items" index="/">首页推荐</el-menu-item>
-        <el-menu-item class="items" index="/myapplication">我的申请</el-menu-item>
+        <el-menu-item v-if="Type == 1" class="items" index="/myapplication">我的申请</el-menu-item>
+        <el-menu-item v-if="Type != 1" class="items" index="/myapplication">社团信息</el-menu-item>
         <el-menu-item class="items" index="/applymanage">招募管理</el-menu-item>
         <el-menu-item class="items" index="/morehelp">更多帮助</el-menu-item>
         <el-sub-menu class="rightBar" index="">
