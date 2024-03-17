@@ -41,9 +41,6 @@ const Scale = computed(() => store.state.scale);
             <el-menu-item class="menuItem" index="/applymanage/authoritymanage">
                 权限管理
             </el-menu-item>
-            <el-menu-item class="menuItem" index="/applymanage/messagemanage">
-                消息管理
-            </el-menu-item>
         </el-menu>
     </div>
 </template>

@@ -7,7 +7,7 @@ export default {
 <script setup lang="ts" name="recruitList">
 import { inject } from 'vue';
 import { Recruit } from './home.types'
-
+import { useRouter } from 'vue-router';
 type gloVar = {
     TWT:string,
     lightTWT:string
@@ -21,8 +21,20 @@ interface Props {
     recruit: Recruit[]
 }
 
+const router = useRouter();
 const props = defineProps<Props>()
-
+const gotoUpload = (index:number) => {
+    const url = router.resolve(
+        { 
+            name: 'upload', 
+            params: { 
+                projectId:props.recruit[index].projectId
+            } 
+        }
+    ).href;
+    window.open(url, '_blank');
+}
+const baseurl = import.meta.env.VITE_API_URL
 </script>
 <template>
     <el-row class="recruitTitle">
@@ -30,9 +42,9 @@ const props = defineProps<Props>()
         {{props.title}}
     </el-row>
     <el-row class="recruitContainer">
-        <div v-for="(items,index) in recruit" :key="index" class="recruit">
+        <div v-for="(items,index) in recruit" :key="index" class="recruit"  @click="gotoUpload(index)">
             <div class="img">
-                <img style="width:100%" :src="items.cover" />
+                <img style="width:100%" :src="baseurl + items.cover" />
             </div>
             <div class="title">
                 {{ items.title }}
@@ -77,12 +89,15 @@ const props = defineProps<Props>()
     overflow: hidden;
 }
 .recruit .title{
-    width: 118px;
-    height: 19px;
+    height: 22px;
     margin:23px 0 0 23px;
     font-size: 22px;
+    line-height:22px;
     font-weight: 600;
     color: #444444;
+    overflow:hidden;
+    white-space: nowarp;
+    text-overflow: ellipsis;
 }
 .recruit .org{
     width: 96px;

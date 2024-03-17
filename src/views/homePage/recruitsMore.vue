@@ -7,6 +7,7 @@ export default {
 <script setup lang="ts" name="recruitList">
 import { inject, ref } from 'vue';
 import { Recruit } from './home.types'
+import { useRouter } from 'vue-router';
 
 type gloVar = {
     TWT:string,
@@ -29,6 +30,19 @@ const changePage = (page:number) => {
 }
 const scaleType = ref(0)
 const statusType = ref(0)
+const router = useRouter();
+const gotoUpload = (index:number) => {
+    const url = router.resolve(
+        { 
+            name: 'upload', 
+            params: { 
+                projectId:props.recruit[index].projectId
+            } 
+        }
+    ).href;
+    window.open(url, '_blank');
+}
+const baseurl = import.meta.env.VITE_API_URL
 </script>
 <template>
     <div class="optionContainer">
@@ -53,9 +67,9 @@ const statusType = ref(0)
         </el-form>
     </div>
     <el-row class="recruitContainer">
-        <div v-for="(items,index) in recruit" :key="index" class="recruit">
+        <div v-for="(items,index) in recruit" :key="index" class="recruit" @click="gotoUpload(index)" >
             <div class="img">
-                <img style="width:100%" :src="items.cover" />
+                <img style="width:100%" :src="baseurl + items.cover" />
             </div>
             <div class="title">
                 {{ items.title }}

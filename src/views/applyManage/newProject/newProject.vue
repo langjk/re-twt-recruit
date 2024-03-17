@@ -44,6 +44,8 @@ const timeQuest = ref<Types.timeQ>({title:'您倾向于什么时间参加面试'
 const campus = ref([])
 const identity = ref([])
 const allDepartments = ref<Types.Department[]>([]);  
+const backCache = ref('')
+const coverCache = ref('')
 var baseurl = import.meta.env.VITE_API_URL
 onMounted(async () => {  
     try {  
@@ -68,10 +70,12 @@ const beforeUpload = (file:any) => {
 const handleCoverUpload = (response: any) => 
 {
     coverUrl.value = import.meta.env.VITE_API_URL + response.result
+    coverCache.value = response.result
 }
 const handleBackUpload = (response: any) => 
 {
     backUrl.value = import.meta.env.VITE_API_URL + response.result
+    backCache.value = response.result
 }
 const addGroup = () => {
     let newGroup = {label:'',id:groupsIdCount.value}
@@ -195,7 +199,7 @@ const saveProject = async () => {
         if(res.code == 200){
             for(let j = 0;j<questString.length;j++){
                 for(let k = 0;k<questString[j].groups.length;k++)
-                    questString[j].groups[k] = res.result[k].groupId
+                    questString[j].groups[k] = res.result[questString[j].groups[k]].groupId
             }
             groupString = ''
             for(let l = 0;l<res.result.length;l++)
@@ -203,7 +207,9 @@ const saveProject = async () => {
             groupString = groupString.slice(0,groupString.length-1)
         }
     })
+    console.log(questString)
     let endTimeString = JSON.stringify(endTime.value).slice(1,11)
+    let ruleString = JSON.stringify(timeQuest.value)
     let scale = localStorage.getItem('scale')
     let clubId = localStorage.getItem('clubId')
     http.post("/v1/child/project",
@@ -211,8 +217,8 @@ const saveProject = async () => {
             title:title.value,
             clubId:clubId,
             groups:groupString, 
-            covers:coverUrl.value,
-            backgrounds:backUrl.value,
+            covers:coverCache.value,
+            backgrounds:backCache.value,
             scale:scale,
             questions:JSON.stringify(questString),
             brief:brief.value,
@@ -224,7 +230,7 @@ const saveProject = async () => {
             circleMethod:circleMethod.value,
             slideLock:lockMethod.value,
             endTime:endTimeString,
-            rules:'',
+            rules:ruleString,
         })
         .then((res:{code:number,result:any})=>{
             if(res.code == 200){
@@ -497,7 +503,7 @@ const gotoPreview = () => {
                     <span></span>
                     申请表单
                 </el-row>
-                <el-form label-position="left" class="blockForm">{{ Questions }}
+                <el-form label-position="left" class="blockForm">
                     <el-space  direction="vertical" alignment="left" class="space">
                         <timeGroup v-model="timeQuest"></timeGroup>
                         <VueDraggableNext :list="Questions" group="name" 

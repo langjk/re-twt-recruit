@@ -28,11 +28,6 @@ const layOutsRoutes: RouteRecordRaw[] = [
                         component:  () => import("@/views/applyManage/authorityManage/authorityManage.vue")
                     },
                     {
-                        path:'messagemanage',
-                        name:'messagemanage',
-                        component:  () => import("@/views/applyManage/messageManage.vue")
-                    },
-                    {
                         path:'projectmanage',
                         name:'projectmanage',
                         component:  () => import("@/views/applyManage/projectManage/projectManage.vue")
@@ -88,6 +83,11 @@ const layOutsRoutes: RouteRecordRaw[] = [
                         name:'timeGroup',
                         component:  () => import("@/views/applyManage/projectManage/manageDetail/timeGroup.vue"),
                         props:true
+                    },
+                    {
+                        path:'messagemanage',
+                        name:'messagemanage',
+                        component:  () => import("@/views/applyManage/projectManage/manageDetail/messageManage.vue")
                     },
                 ],
                 props:true

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import sideBar from '@/components/applyManage/sideBar.vue'
+import projectSideBar from '@/components/applyManage/projectManage/projectSideBar.vue'
 </script>
 
 <template>
     <div class="mainContainer">
         <el-container>
             <el-aside>
-                <sideBar></sideBar>
+                <projectSideBar></projectSideBar>
             </el-aside>
         </el-container>
     </div>

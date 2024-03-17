@@ -53,6 +53,9 @@ http.get("/v1/user/project", {projectId:projectId
             <el-menu-item class="menuItem" :index="'/projectdetail/'+projectId+'/timeGroup'">
                 时间分组
             </el-menu-item>
+            <el-menu-item class="menuItem" :index="'/projectdetail/'+projectId+'/messagemanage'">
+                消息管理
+            </el-menu-item>
         </el-menu>
     </div>
 </template>

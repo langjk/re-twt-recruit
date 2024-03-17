@@ -3,6 +3,7 @@ import { inject,ref,onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { MdPreview } from 'md-editor-v3';
 import 'md-editor-v3/lib/style.css';
+import http from '@/utils/http'
 const route = useRoute();
 type gloVar = {
     TWT:string,
@@ -10,7 +11,21 @@ type gloVar = {
 }
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
-const data = JSON.parse(route.params.data as string);
+const title = ref('')
+const filterMethod = ref("0")
+const endTime = ref('')
+const contact = ref('')
+const brief= ref('')
+const backUrl = ref('')
+const titleColor = ref('#FFFFFF')
+const backColor = ref('#00a1e9')
+const pageMethod = ref('25%')
+const circleMethod = ref('repeat')
+const lockMethod = ref('fixed')
+const groups = ref<any[]>([])
+const timeQuest = ref({title:'',time:[]})
+const baseurl = import.meta.env.VITE_API_URL
+var projectId = route.params.projectId
 type Answer = {
     questionId:number,
     questionAnswer:any
@@ -21,50 +36,107 @@ type uploadAnswer = {
 }
 const answers = ref<uploadAnswer[]>([]);
 const questions:any = ref([]);
-const fetchGroup = () => {
-    for(let i = 0;i<data.groups.length;i++){
-        let uploadAnswer:uploadAnswer = {groupId:0,quest:[]}
-        questions.value.push([]);
-        for(let j = 0;j<data.Questions.length;j++){
-            if(data.Questions[j].groups.includes(i)){
-                if(data.Questions[j].type == 's')
-                    uploadAnswer.quest.push({questionId:0,questionAnswer:[]})
-                else
-                    uploadAnswer.quest.push({questionId:0,questionAnswer:''})
-                questions.value[i].push(data.Questions[j])
+const fetchDetail = async () => {
+    await http.get("/v1/user/project", {projectId:projectId
+        }).then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                title.value = res.result.title
+                filterMethod.value = res.result.filterMethod
+                endTime.value = res.result.endTime
+                contact.value = res.result.contact
+                brief.value = res.result.brief
+                backUrl.value = 'url(' + baseurl + res.result.background + ')'
+                titleColor.value = res.result.titleColor
+                backColor.value = res.result.backColor
+                pageMethod.value = res.result.pageMethod
+                circleMethod.value = res.result.circleMethod
+                lockMethod.value = res.result.slideLock
+                groups.value = res.result.groups
+                timeQuest.value = JSON.parse(res.result.rules)
             }
+        });
+    for(let i = 0;i<groups.value.length;i++){
+        let uploadAnswer:uploadAnswer = {groupId:groups.value[i].groupId,quest:[]}
+        questions.value.push([]);
+        for(let j = 0;j<groups.value[i].questions.length;j++){
+                if(groups.value[i].questions[j].type == 's')
+                    uploadAnswer.quest.push({questionId:groups.value[i].questions[j].questionId,questionAnswer:[]})
+                else
+                    uploadAnswer.quest.push({questionId:groups.value[i].questions[j].questionId,questionAnswer:''})
+                var handleQuest:any = groups.value[i].questions[j]
+                handleQuest.questionContent = JSON.parse(handleQuest.questionContent)
+                questions.value[i].push(handleQuest)
         }
         answers.value.push(uploadAnswer)
     }
 }
-const titleColor = data.titleColor;
-const backColor = data.backColor;
 const groupSelect = ref<string[]>([]);
 const checkGroupSelect = (label:string) => {
     return groupSelect.value.includes(label);
 }
 onMounted(async () => {  
     try {  
-    fetchGroup();} catch (error) {  
+    fetchDetail();} catch (error) {  
     console.error('Error fetching groups:', error);  
     }  
 }); 
 const timeSelect = ref([])
+const uploadApplication = () => {
+    let timeString = ''
+    let groupString = ''
+    for(let i = 0;i<timeSelect.value.length;i++){
+        timeString = timeString + timeSelect.value[i] + ','
+    }
+    timeString = timeString.slice(0,timeString.length-1)
+    groupString = JSON.stringify(groupSelect.value)
+    groupString = groupString.slice(1,groupString.length-1)
+    http.post("/v1/user/application", {
+        applicationUid:userDetail.uid,
+        applicationName:userDetail.name,
+        projectId:projectId,
+        applicationContact:userContact.value.telephone,
+        applicationCampus:userContact.value.campus,
+        wantedGroupIds:groupString,
+        answers:JSON.stringify(answers.value),
+        times:timeString
+        }).then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                
+            }
+        });
+}
+const userDetail = {
+    name:localStorage.getItem('nickname'),
+    major:localStorage.getItem('major'),
+    grade:localStorage.getItem('grade'),
+    uid:localStorage.getItem('uid'),
+    department:localStorage.getItem('department')
+}
+type contact = {
+    campus:any,
+    telephone:any,
+    email:any
+}
+const userContact = ref<contact>({
+    campus:'',
+    telephone:'',
+    email:''
+})
+userContact.value.campus=localStorage.getItem('campus'),
+userContact.value.telephone=localStorage.getItem('telephone'),
+userContact.value.email=localStorage.getItem('email')
+const campusOption = ['卫津路校区','北洋园校区']
 </script>
 <template>
     <div class="container">
-        <el-row class="warnDiv">
-            <el-icon><Warning /></el-icon>
-            <div>此为预览页面 仅供参考</div>
-        </el-row>
         <div class="avatar" />
-        <div class="title"> {{ data.title }}</div>
+        <div class="title"> {{ title }}</div>
         <div class="blockContainer">
             <el-row class="blockTitle">
                 <span></span>
                 项目简介
             </el-row>
-            <MdPreview :modelValue="data.brief.toString()"></MdPreview>
+            <MdPreview :modelValue="brief.toString()"></MdPreview>
         </div>
         <div class="blockContainer">
             <el-row class="blockTitle">
@@ -73,15 +145,15 @@ const timeSelect = ref([])
             </el-row>
             <el-row class="inforContainer">
                 <el-col :span="1">姓名</el-col>
-                <el-col :span="7">预览页面</el-col>
+                <el-col :span="7">{{userDetail.name}}</el-col>
                 <el-col :span="1">学院</el-col>
-                <el-col :span="6">预览页面</el-col>
+                <el-col :span="6">{{userDetail.department}}</el-col>
             </el-row>
             <el-row class="inforContainer">
                 <el-col :span="1">专业</el-col>
-                <el-col :span="7">预览页面</el-col>
+                <el-col :span="7">{{userDetail.major}}</el-col>
                 <el-col :span="1">年级</el-col>
-                <el-col :span="6">预览页面</el-col>
+                <el-col :span="6">{{userDetail.grade}}</el-col>
             </el-row>
             <br />
             <el-row class="blockTitle">
@@ -90,13 +162,26 @@ const timeSelect = ref([])
             </el-row>
             <el-row class="inforContainer">
                 <el-col :span="1">校区</el-col>
-                <el-col :span="7">预览页面</el-col>
+                <el-col :span="7">
+                    <el-select v-model="userContact.campus" class="input">
+                        <el-option
+                        v-for="item in campusOption"
+                        :key="item"
+                        :label="item"
+                        :value="item"
+                        />
+                    </el-select>
+                </el-col>
                 <el-col :span="1">电话</el-col>
-                <el-col :span="6">预览页面</el-col>
+                <el-col :span="6">
+                    <el-input class="input" v-model="userContact.telephone" />
+                </el-col>
             </el-row>
             <el-row class="inforContainer">
                 <el-col :span="1">邮箱</el-col>
-                <el-col :span="7">预览页面</el-col>
+                <el-col :span="7">
+                    <el-input class="input" v-model="userContact.email" />
+                </el-col>
             </el-row>
             <br />
             <el-row class="blockTitle">
@@ -109,23 +194,23 @@ const timeSelect = ref([])
                 </div>
                 <el-checkbox-group class="groupButtonContainer" v-model="groupSelect">
                     <el-checkbox
-                        v-for="group in data.groups"
-                        :key="group.id"
-                        :label="group.label"
-                        :value="group.id"
-                        ></el-checkbox>
+                        v-for="group in groups"
+                        :key="group.groupId"
+                        :label="group.groupId"
+                        :true-value="group.groupId"
+                        >{{group.groupName}}</el-checkbox>
                 </el-checkbox-group>
             </div>
             <div class="inforContainer">
                 <div class="questTitle">
-                    2.{{ data.timeQuestTitle }}
+                    2.{{ timeQuest.title }}
                 </div>
                 <el-tabs type="border-card" class="time-tabs">
                     <el-tab-pane label='上午'>
                     <slot>
                         <el-checkbox-group v-model="timeSelect">
                             <div v-for="index in 5" :key="index"  class="timeTab">
-                                <div  v-if="data.timeQuestTime[index-1]">
+                                <div  v-if="timeQuest.time[index-1]">
                                     <el-divider></el-divider>
                                     <el-checkbox style="width:100%"
                                     :label="(index+6)+':00-'+(index+7)+':00'" value="Value A" />
@@ -138,7 +223,7 @@ const timeSelect = ref([])
                         <slot>
                             <el-checkbox-group v-model="timeSelect">
                                 <div v-for="index in 5" :key="index"  class="timeTab">
-                                    <div  v-if="data.timeQuestTime[index+4]">
+                                    <div  v-if="timeQuest.time[index+4]">
                                         <el-divider></el-divider>
                                         <el-checkbox style="width:100%"
                                         :label="(index+11)+':00-'+(index+12)+':00'" value="Value A" />
@@ -151,7 +236,7 @@ const timeSelect = ref([])
                         <slot>
                             <el-checkbox-group v-model="timeSelect">
                                 <div v-for="index in 5" :key="index"  class="timeTab">
-                                    <div  v-if="data.timeQuestTime[index+9]">
+                                    <div  v-if="timeQuest.time[index+9]">
                                         <el-divider></el-divider>
                                         <el-checkbox style="width:100%"
                                         :label="(index+16)+':00-'+(index+17)+':00'" value="Value A" />
@@ -164,15 +249,15 @@ const timeSelect = ref([])
             </div>
             <div class="inforContainer">
                 <el-collapse class="groupCol">
-                    <div  v-for="(group,groupindex) in data.groups" :key="group.id" >
-                        <el-collapse-item :title="group.label+' 问卷'" 
-                        v-if="checkGroupSelect(group.label)">
+                    <div  v-for="(group,groupindex) in groups" :key="group.id" >
+                        <el-collapse-item :title="group.groupName+' 问卷'" 
+                        v-if="checkGroupSelect(group.groupId)">
                             <div class="questionContainer">
                                 <div v-for="(item,index) in questions[groupindex]" :key="index" > 
                                         <div class="questionTitle">
-                                            {{ item.title }}
+                                            {{ item.questionContent.title }}
                                         </div>
-                                        <div v-if="item.type == 't'">
+                                        <div v-if="item.questionContent.type == 't'">
                                             <el-input
                                             v-model="answers[groupindex].quest[index].questionAnswer"
                                             class="textInput"
@@ -181,18 +266,18 @@ const timeSelect = ref([])
                                             placeholder="请简述你的回答"
                                             />
                                         </div>
-                                        <div v-if="item.type == 's'">
+                                        <div v-if="item.questionContent.type == 's'">
                                             <div class="selectInput">
                                                 <el-checkbox-group v-model="answers[groupindex].quest[index].questionAnswer"
-                                                :min="item.optionDetail.minSelect" :max="item.optionDetail.maxSelect">
+                                                :min="item.questionContent.optionDetail.minSelect" :max="item.questionContent.optionDetail.maxSelect">
                                                     <el-checkbox
-                                                        v-for="option in item.optionDetail.options"
+                                                        v-for="option in item.questionContent.optionDetail.options"
                                                         :key="option.id"
                                                         :label="option.label"
                                                         :value="option.id"
                                                         ></el-checkbox>
                                                 </el-checkbox-group>
-                                                最少选{{ item.optionDetail.minSelect }}项,最多选{{ item.optionDetail.maxSelect }}项
+                                                最少选{{ item.questionContent.optionDetail.minSelect }}项,最多选{{ item.questionContent.optionDetail.maxSelect }}项
                                             </div>
                                         </div>
                                 </div>
@@ -201,6 +286,9 @@ const timeSelect = ref([])
                     </div>
                 </el-collapse>
             </div>
+            <el-row style="justify-content:space-evenly">
+                <el-button class="PreAndSaveButton" type="primary" @click="uploadApplication()">提交问卷</el-button>
+            </el-row>
         </div>
     </div>
 </template>
@@ -214,20 +302,11 @@ const timeSelect = ref([])
     flex-direction: column;
     justify-content: center;
     background-color:v-bind(backColor);
+    background-image: v-bind(backUrl);
+    background-attachment: v-bind(lockMethod);
+    background-repeat: v-bind(circleMethod);
+    background-size: v-bind(pageMethod);
     min-height:100vh;
-}
-.warnDiv{
-    width: 1200px;
-    height: 60px;
-    background: #FFFFFF;
-    box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
-    border-radius: 10px;
-    justify-content: center;
-    align-content: center;
-    font-size: 16px;
-}
-.warnDiv .el-icon{
-    margin-top: 5px;
 }
 .avatar{
     width: 100px;
@@ -273,6 +352,7 @@ const timeSelect = ref([])
     margin-left:30px;
     font-size:14px;
     margin-bottom:15px;
+    align-items: center;
 }
 .questTitle{
     height: 17px;
@@ -338,5 +418,12 @@ const timeSelect = ref([])
 }
 .selectInput :deep(.el-checkbox__label){
     font-size:12px;
+}
+.PreAndSaveButton{
+    width:264px;
+    margin-bottom:100px;
+}
+.input{
+    width:250px;
 }
 </style>
