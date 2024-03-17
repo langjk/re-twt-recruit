@@ -4,8 +4,10 @@ export default {
 }
 </script>
 <script setup lang="ts" name="appSideBar">
-import { inject } from 'vue';
+import { inject, computed } from 'vue';
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex';
+const store = useStore(); 
 
 type gloVar = {
     TWT:string,
@@ -14,13 +16,19 @@ type gloVar = {
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
 const route = useRoute();
+var clubName = localStorage.getItem('clubName')
+var userScale = localStorage.getItem('scale')
+store.commit('SET_CLUB_NAME', clubName);   
+store.commit('SET_USER_SCALE', userScale);   
+const userInfo = computed(() => store.state.clubName);  
+const Scale = computed(() => store.state.scale);  
 </script>
 
 <template>
     <div class="container">
         <img src="@/assets/logo.png" class="avatar" />
-        <div class="nickName">天外天工作室</div>
-        <div class="orgTitle">校级学生组织</div> 
+        <div class="nickName">{{userInfo}}</div>
+        <div class="orgTitle">{{(Scale == 0) ? '院级学生组织' : '校级学生组织'}}</div> 
         <el-divider style="width:75%;margin:0 auto" />
         <el-menu mode="vertical" class="sideMenu" :router="true" :default-active="route.path"
         :active-text-color="TWT"    >

@@ -19,13 +19,21 @@ const TWT:string = globalVars.TWT;
         {account:account.value,password:password.value, })
         .then((res:{code:number,result:any})=>{
             if(res.code == 200){ 
-                store.commit('SET_USER_INFO', res.result.name); 
                 localStorage.setItem('token', res.result.token);
-                localStorage.setItem('nickname', res.result.name);
                 localStorage.setItem('accountType', res.result.accountType);
-                if(res.result.accountType > 1){
-                    localStorage.setItem('clubId',res.result.clubId)
-                    localStorage.setItem('scale',res.result.scale)
+                if(res.result.accountType == 1){
+                    store.commit('SET_USER_INFO', res.result.name); 
+                    localStorage.setItem('nickname', res.result.name);
+                    localStorage.setItem('uid', res.result.uid);
+                }
+                else if(res.result.accountType > 1){
+                    store.commit('SET_USER_SCALE', res.result.scale); 
+                    store.commit('SET_CLUB_NAME', res.result.name);  
+                    store.commit('SET_USER_INFO', res.result.name);  
+                    localStorage.setItem('clubId',res.result.clubId);
+                    localStorage.setItem('scale',res.result.scale);
+                    localStorage.setItem('clubName', res.result.name);
+                    localStorage.setItem('nickname', res.result.name);
                 }
                 router.push("/");
             }

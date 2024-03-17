@@ -27,11 +27,12 @@ watch(() => globalVars.lightTWT, (newValue) => {
     lightTWT.value =newValue
 })
 var  userName = localStorage.getItem('nickname')
-store.commit('SET_USER_INFO', userName);   
-const userInfo = computed(() => store.state.name);  
+if(userName)
+    store.commit('SET_USER_INFO', userName);   
+var userInfo = computed(() => store.state.name); 
 const resetLogin = () => {
     store.commit('SET_USER_INFO', '');
-    router.push('/Login')
+    router.push('/Login');
 }
 
 const checkLogin = () => {

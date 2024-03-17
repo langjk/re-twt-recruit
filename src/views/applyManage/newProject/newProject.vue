@@ -206,7 +206,6 @@ const saveProject = async () => {
     let endTimeString = JSON.stringify(endTime.value).slice(1,11)
     let scale = localStorage.getItem('scale')
     let clubId = localStorage.getItem('clubId')
-    console.log(scale,clubId)
     http.post("/v1/child/project",
         {
             title:title.value,
