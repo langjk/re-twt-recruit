@@ -16,7 +16,6 @@ const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
 const route = useRoute();
 var projectId = route.params.projectId
-console.log(projectId[2])
 
 const title = ref('')
 const statusNum = ref(0)

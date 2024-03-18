@@ -4,7 +4,7 @@ export default {
 }
 </script>
 <script setup lang="ts" name="textQuest">
-import { inject,ref,defineExpose } from 'vue';
+import { inject,ref } from 'vue';
 import { textQ } from '@/views/applyManage/newProject/newProjectType'
 type gloVar = {
     TWT:string,

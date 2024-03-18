@@ -35,8 +35,8 @@ http.get("/v1/user/project", {projectId:projectId
                 endTime.value = res.result.endTime
                 contact.value = res.result.contact
                 brief.value = res.result.brief
-                coverUrl.value = res.result.cover
-                backUrl.value = res.result.background
+                coverUrl.value = baseurl + res.result.cover
+                backUrl.value = baseurl + res.result.background
                 titleColor.value = res.result.titleColor
                 backColor.value = res.result.backColor
                 pageMethod.value = res.result.pageMethod
