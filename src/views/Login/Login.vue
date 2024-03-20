@@ -32,6 +32,7 @@ const TWT:string = globalVars.TWT;
                     localStorage.setItem('telephone', res.result.telephone);
                     localStorage.setItem('email', res.result.email);
                     localStorage.setItem('campus', res.result.campus);
+                    localStorage.setItem('stuType', res.result.stuType);
                 }
                 else if(res.result.accountType > 1){
                     store.commit('SET_USER_SCALE', res.result.scale); 
@@ -41,6 +42,7 @@ const TWT:string = globalVars.TWT;
                     localStorage.setItem('scale',res.result.scale);
                     localStorage.setItem('clubName', res.result.name);
                     localStorage.setItem('nickname', res.result.name);
+                    localStorage.setItem('avatar', res.result.avatar);
                 }
                 router.push("/");
             }

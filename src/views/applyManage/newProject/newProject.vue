@@ -306,7 +306,7 @@ const gotoPreview = () => {
                                 </el-row>
                             </div>
                         </el-form-item>
-                        <el-form-item label="筛选方式">
+                        <!-- <el-form-item label="筛选方式">
                             <div class="filterMethod">
                                 <el-radio-group v-model="filterMethod">
                                     <el-radio label="0" size="default">按照第一志愿筛选</el-radio>
@@ -330,7 +330,7 @@ const gotoPreview = () => {
                                     <div>组别和筛选方式在项目公开后不可更改</div>
                                 </el-row>
                             </div>
-                        </el-form-item>
+                        </el-form-item> -->
                         <el-form-item label="招募截止时间">
                             <div class="datePicker">
                                 <el-date-picker

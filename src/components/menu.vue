@@ -11,6 +11,8 @@ import { useStore } from 'vuex';
 const store = useStore(); 
 const router = useRouter();
 const route = useRoute();
+
+
 type gloVar = {
     TWT:string,
     lightTWT:string
@@ -26,29 +28,37 @@ watch(() => globalVars.TWT, (newValue) => {
 watch(() => globalVars.lightTWT, (newValue) => {
     lightTWT.value =newValue
 })
+
+
 var userName = localStorage.getItem('nickname')
+
 if(userName)
     store.commit('SET_USER_INFO', userName);   
+
 var userInfo = computed(() => store.state.name); 
+
 const resetLogin = () => {
+    localStorage.clear();
     store.commit('SET_USER_INFO', '');
+    store.commit('SET_USER_SCALE', 0);
+    store.commit('SET_CLUB_NAME', '');
+    store.commit('SET_USER_TYPE', 0);
     router.push('/Login');
 }
+
 var accountType = Number(localStorage.getItem('accountType'))
 if(accountType)
     store.commit('SET_USER_TYPE', accountType); 
 var Type = computed(() => store.state.accountType);
-const checkLogin = () => {
-    if(!userInfo){
-        localStorage.removeItem('token');
-        localStorage.removeItem('nickname');
-        localStorage.removeItem('accountType');
-        router.push('/Login');
-    }
-    else{
-        router.push('/myApplication')
-    }
-}
+// const checkLogin = () => {
+//     if(!userInfo){
+//         localStorage.clear();
+//         router.push('/Login');
+//     }
+//     else{
+//         router.push('/myApplication')
+//     }
+// }
 </script>
 
 <template>
@@ -75,7 +85,7 @@ const checkLogin = () => {
                     {{userInfo}}
                 </el-row>
             </template>
-            <el-menu-item @click="checkLogin()">个人信息</el-menu-item>
+            <!-- <el-menu-item @click="checkLogin()">个人信息</el-menu-item> -->
             <el-menu-item index="/Login" @click="resetLogin()">退出登录</el-menu-item>
         </el-sub-menu>
     </el-menu>

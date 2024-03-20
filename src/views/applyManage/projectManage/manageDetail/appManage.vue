@@ -4,7 +4,9 @@ import projectSideBar from '@/components/applyManage/projectManage/projectSideBa
 import http from '@/utils/http'
 import detailBar from '@/components/manageDetail/detailBar.vue';
 import { useRoute } from 'vue-router';
+import { ElMessage } from 'element-plus';
 const route = useRoute();
+
 type gloVar = {
     TWT:string,
     lightTWT:string
@@ -12,7 +14,10 @@ type gloVar = {
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
 const lightTWT:string = globalVars.lightTWT
+
 var projectId = route.params.projectId
+
+
 const groups = ref<any>([]) //组别
 const timeQuest = ref<number[]>([]) //记录全部时间段是否被选为面试时间的数组
 const tableData = ref<any>([]) //‘全部’页面的人员展示表格数据暂存
@@ -26,7 +31,24 @@ const interviewCount = ref<number[]>([0,0,0]) //各面试进度人数
 const interviewType = ref<any>(0) //当前选择的面试进度类型
 const nowTableData = ref<any>([]) //当前页面人员展示表格数据，和tableData区分开
 //各面试时间、面试进度人数单独储存(countData,interviewCount)，不要使用{{插值}}，防止http获取数据失败产生0值报错
+
 const activeName = ref<any>(0) //选取展示详情的人员
+const userSelect = ref<any>([]) //组别页面选中的人
+const isAllSelect = ref<boolean>(false) //👆是否全选
+const nowSelectGroup = ref<number>(0)
+
+
+//各个弹窗显示flag--------------------------
+const newCategoryFlag = ref<boolean>(false)
+const moveFlag = ref<boolean>(false)
+const copyFlag = ref<boolean>(false)
+const sendFlag = ref<boolean>(false)
+const exportFlag = ref<boolean>(false)
+//-----------------------------------------
+
+const categoryName = ref<string>('') //新增分类的名称
+const targetCategory = ref<string>('') //复制、移动的目标分类
+
 export type Detail = {
     createdTime: string,
     DepartmentAndMajor: string,
@@ -100,16 +122,17 @@ const changeTime = (time:number) => {
         //当前显示的人员应当是：人员数据[选中的面试时间].applications
     }
 }
-
-//改变选择类别函数 同时更新人员显示
-const getCategory = (pane: any) => {
+//获取类别函数 同时更新人员显示
+const getCategory = async (pane: any) => {
+    nowSelectGroup.value = groups.value[pane.index-1].groupId
+    console.log(groups.value[pane.index-1])
     if(pane.index == 0){
         fetchTimeData();
         changeSlot(0);
     }
     else{
         var groupId = groups.value[pane.index-1].groupId
-        http.get("/v1/staff/category/detail", {projectId:projectId,groupId:groupId
+        await http.get("/v1/staff/category/detail", {projectId:projectId,groupId:groupId
         }).then((res:{code:number,result:any})=>{
             if(res.code == 200){
                 categoryList.value = res.result.categories
@@ -123,7 +146,6 @@ const getCategory = (pane: any) => {
             }
         });
     }
-    console.log('!!')
     activeName.value = 0
     showDetail.value = {
         createdTime: '',
@@ -133,6 +155,10 @@ const getCategory = (pane: any) => {
         questions: [],
         comments: []
     }
+    for(let i = 0; i < nowTableData.value.length; i++){
+        userSelect.value[i] = false
+    }
+    isAllSelect.value = false;
 }
 
 //改变面试进度函数 同时更新人员显示
@@ -140,6 +166,10 @@ const changeInter = (type:number) => {
     interviewType.value = type
     nowTableData.value = categoryList.value[categorySelect.value].content[interviewType.value].applications
     activeName.value = 0
+    for(let i = 0; i < nowTableData.value.length; i++){
+        userSelect.value[i] = false
+    }
+    isAllSelect.value =  false;
     //当前显示的人员应当是：类别[选中的类别].content[选中的面试阶段].applications
 }
 
@@ -168,6 +198,170 @@ const getShowDetail = async (name : any) => {
             comments: []
         }
 }
+
+//全选/取消全选
+const allSelect = () => {
+    console.log(isAllSelect.value)
+    for(let i = 0; i < nowTableData.value.length; i++){
+        userSelect.value[i] = isAllSelect.value
+    }
+}
+
+//校验是否全选
+const checkAllSelect = () => {
+    var flag = true
+    for(let i = 0; i < nowTableData.value.length; i++){
+        if(userSelect.value[i] == false)
+            flag = false
+    }
+    isAllSelect.value = flag
+}
+
+//获取选中的applicationId
+const getId = () => {
+    var IdString = ''
+    for(let i = 0; i < nowTableData.value.length; i++){
+        if(userSelect.value[i] == true)
+            IdString = IdString + nowTableData.value[i].applicationId + ','
+    }
+    IdString = IdString.slice(0,IdString.length - 1)
+    return IdString
+}
+
+//复制
+const copyUser = () => {
+    var applicationId = getId()
+    http.post("/v1/inter/category/copy", {
+        applicationId:applicationId,
+        categoryId:targetCategory.value
+    }).then((res:{code:number,result:any})=>{
+        if(res.code == 200){
+            ElMessage.success('复制成功！')
+            copyFlag.value = false
+            http.get("/v1/staff/category/detail", {projectId:projectId,groupId:nowSelectGroup.value
+            }).then((res:{code:number,result:any})=>{
+                if(res.code == 200){
+                    categoryList.value = res.result.categories
+                    interviewType.value = 0 //切换了页面 将选中面试阶段回到0
+                    for(let i = 0; i<3; i++){
+                        interviewCount.value[i] = Number(categoryList.value[categorySelect.value].content[i].count)
+                    //三个值分别对应未面试 已面试和一面过,在：类别[当前选中的类别].content[三个值index].count获取
+                    }
+                    nowTableData.value = categoryList.value[categorySelect.value].content[interviewType.value].applications
+                    //当前显示的人员应当是：类别[选中的类别].content[选中的面试阶段].applications
+                }
+            });
+            activeName.value = 0
+            for(let i = 0; i < nowTableData.value.length; i++){
+                userSelect.value[i] = false
+            }
+            isAllSelect.value =  false;
+        }
+    });
+}
+
+//移动
+const moveUser = () => {
+    var applicationId = getId()
+    http.post("/v1/inter/category/cut", {
+        applicationId:applicationId,
+        newCategoryId:targetCategory.value,
+        oldCategoryId:categoryList.value[categorySelect.value].categoryId
+    }).then((res:{code:number,result:any})=>{
+        if(res.code == 200){
+            ElMessage.success('移动成功！')
+            moveFlag.value = false
+            http.get("/v1/staff/category/detail", {projectId:projectId,groupId:nowSelectGroup.value
+            }).then((res:{code:number,result:any})=>{
+                if(res.code == 200){
+                    categoryList.value = res.result.categories
+                    interviewType.value = 0 //切换了页面 将选中面试阶段回到0
+                    for(let i = 0; i<3; i++){
+                        interviewCount.value[i] = Number(categoryList.value[categorySelect.value].content[i].count)
+                    //三个值分别对应未面试 已面试和一面过,在：类别[当前选中的类别].content[三个值index].count获取
+                    }
+                    nowTableData.value = categoryList.value[categorySelect.value].content[interviewType.value].applications
+                    //当前显示的人员应当是：类别[选中的类别].content[选中的面试阶段].applications
+                }
+            });
+            activeName.value = 0
+            for(let i = 0; i < nowTableData.value.length; i++){
+                userSelect.value[i] = false
+            }
+            isAllSelect.value =  false;
+        }
+    });
+}
+
+//发送短信
+const sendMessage = () => {
+    console.log(getId())
+}
+
+//导出信息
+const exportData = async () => {
+    var applicationIds = getId()
+    const response = await http.getFile("/v1/inter/export", {applicationIds:applicationIds})
+        
+    // 创建一个blob对象  
+    const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });  
+        
+    // 创建一个下载链接  
+    const url = window.URL.createObjectURL(blob);  
+    const link = document.createElement('a');  
+    link.href = url;  
+    link.setAttribute('download', 'exported_data.xlsx'); // 设置下载的文件名  
+        
+    // 模拟点击下载链接  
+    document.body.appendChild(link);  
+    link.click();  
+        
+    // 清理  
+    window.URL.revokeObjectURL(url);  
+    document.body.removeChild(link);  
+        
+    ElMessage.success('生成Excel成功！');  
+}
+
+//增加分类
+const addCategory = async () => {
+    await http.post("/v1/inter/category/new", {groupId:nowSelectGroup.value,
+        projectId:projectId,
+        categoryName:categoryName.value
+        }).then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                ElMessage.success('添加分类成功！')
+                http.get("/v1/staff/category/detail", {projectId:projectId,groupId:nowSelectGroup.value
+                }).then((res:{code:number,result:any})=>{
+                    if(res.code == 200){
+                        categoryList.value = res.result.categories
+                        interviewType.value = 0 //切换了页面 将选中面试阶段回到0
+                        for(let i = 0; i<3; i++){
+                            interviewCount.value[i] = Number(categoryList.value[categorySelect.value].content[i].count)
+                        //三个值分别对应未面试 已面试和一面过,在：类别[当前选中的类别].content[三个值index].count获取
+                        }
+                        nowTableData.value = categoryList.value[categorySelect.value].content[interviewType.value].applications
+                        //当前显示的人员应当是：类别[选中的类别].content[选中的面试阶段].applications
+                    }
+                });
+                newCategoryFlag.value = false
+            }
+        });
+}
+
+//改变分类 同时更新人员显示、、
+const changeCategory = (index:number) => {
+    categorySelect.value = index
+    nowTableData.value = categoryList.value[categorySelect.value].content[interviewType.value].applications
+    for(let i = 0; i < 3; i++)
+        interviewCount.value[i] = Number(categoryList.value[categorySelect.value].content[i].count)
+                //三个值分别对应未面试 已面试和一面过,在：类别[当前选中的类别].content[三个值index].count获取
+    activeName.value = 0
+    for(let i = 0; i < nowTableData.value.length; i++){
+        userSelect.value[i] = false
+    }
+    isAllSelect.value =  false;
+}
 </script>
 
 <template>
@@ -176,7 +370,7 @@ const getShowDetail = async (name : any) => {
             <projectSideBar></projectSideBar>
         </el-aside>
         <el-main style="padding:0;overflow:hidden">
-            <el-tabs type="border-card"  @tab-click="getCategory">
+            <el-tabs class="Tabs" type="border-card"  @tab-click="getCategory">
                 <el-tab-pane label="全部" @tab-click="fetchTimeData()">
                         <div class="tab-title">选择天数</div>
                         <div class="tab-buttonContainer">
@@ -220,7 +414,8 @@ const getShowDetail = async (name : any) => {
                         <div class="tab-title">选择分类</div>
                         <div class="tab-buttonContainer">
                             <div v-for="(category, index) in categoryList" :key="index" 
-                            :class="(categorySelect == index) ? 'active' : 'normal'">{{category.categoryName}}</div>
+                            :class="(categorySelect == index) ? 'active' : 'normal'" @click="changeCategory(index)">{{category.categoryName}}</div>
+                            <div class="normal" @click="newCategoryFlag = true"><el-icon><Plus /></el-icon></div>
                         </div>
                         <div class="tab-title">面试进度</div>
                         <div class="tab-buttonContainer">
@@ -235,18 +430,20 @@ const getShowDetail = async (name : any) => {
                             </div>
                         </div>
                         <el-row class="buttonContainer">
-                            <el-col :span="14" style="justify-items:left"><el-checkbox>全选</el-checkbox></el-col>
+                            <el-col :span="14" style="justify-items:left">
+                                <el-checkbox @change="allSelect" v-model="isAllSelect">全选</el-checkbox>
+                            </el-col>
                             <el-col :span="10">
-                                <el-button class="button">复制</el-button>
-                                <el-button class="button">移动</el-button>
-                                <el-button class="button">发送短信</el-button>
-                                <el-button class="button">导出信息</el-button>
+                                <el-button class="button" @click="copyFlag = true">复制</el-button>
+                                <el-button class="button" @click="moveFlag = true">移动</el-button>
+                                <el-button class="button" @click="sendMessage">发送短信</el-button>
+                                <el-button class="button" @click="exportData">导出信息</el-button>
                             </el-col>
                         </el-row>
                         <el-collapse class="collapse" accordion @change="getShowDetail" v-model="activeName">
                             <el-row style="align-items: flex-start;" v-for="(item,index) in nowTableData" :key="index">
                                 <el-col :span="1">
-                                    <el-checkbox class="checkbox"></el-checkbox>
+                                    <el-checkbox class="checkbox" @change="checkAllSelect" v-model="userSelect[index]"></el-checkbox>
                                 </el-col>
                                 <el-col :span="23">
                                     <el-collapse-item :name="item.applicationId">
@@ -266,8 +463,100 @@ const getShowDetail = async (name : any) => {
                 </el-tab-pane>
             </el-tabs>
         </el-main>
-
     </el-container>
+
+
+<!--新建分类弹窗-->
+<el-dialog v-model="newCategoryFlag" >
+    <template #header>
+        <div class="dialogTitle">
+            <div class="dialogSpan"/>新增分类 
+        </div> 
+    </template>
+    <div style="display:flex;justify-content:center;align-items:center">
+        <span style="font-weight:bold">新分类名称</span>
+        <el-input class="categoryInput" v-model="categoryName" />
+    </div>
+    <template #footer>
+    <div class="dialog-footer">
+        <el-button @click="newCategoryFlag = false">取消</el-button>
+        <el-button type="primary" @click="addCategory()">
+            添加
+        </el-button>
+    </div>
+    </template>
+</el-dialog>
+
+<!--复制弹窗-->
+<el-dialog v-model="copyFlag">
+    <template #header>
+        <div class="dialogTitle">
+            <div class="dialogSpan"/>复制组别  
+        </div> 
+    </template>
+    <div style="display:flex;justify-content:center;align-items:center">
+        <span style="font-weight:bold">分类名称</span>
+        <el-select class="roleSelect" v-model="targetCategory">
+            <el-option v-for="(category,index) in categoryList.slice(0,categoryList.length)" :key="index"
+            :label="category.categoryName" :value="category.categoryId" />
+        </el-select>
+    </div>
+    <template #footer>
+    <div class="dialog-footer">
+        <el-button @click="copyFlag = false">取消</el-button>
+        <el-button type="primary" @click="copyUser()">
+            添加
+        </el-button>
+    </div>
+    </template>
+</el-dialog>
+
+<!--移动弹窗-->
+<el-dialog v-model="moveFlag" >
+    <template #header>
+        <div class="dialogTitle">
+            <div class="dialogSpan"/>移动组别 
+        </div> 
+    </template>
+    <div style="display:flex;justify-content:center;align-items:center">
+        <span style="font-weight:bold">分类名称</span>
+        <el-select class="roleSelect" v-model="targetCategory">
+            <el-option v-for="(category,index) in categoryList.slice(0,categoryList.length)" :key="index"
+            :label="category.categoryName" :value="category.categoryId" />
+        </el-select>
+    </div>
+    <template #footer>
+    <div class="dialog-footer">
+        <el-button @click="moveFlag = false">取消</el-button>
+        <el-button type="primary" @click="moveUser()">
+            添加 
+        </el-button>
+    </div>
+    </template>
+</el-dialog>
+
+<!--发送信息弹窗-->
+<el-dialog v-model="moveFlag" >
+    <template #header>
+        <div class="dialogTitle">发送消息
+        </div> 
+    </template>
+    <div style="display:flex;justify-content:center;align-items:center">
+        <span style="font-weight:bold">分类名称</span>
+        <el-select class="roleSelect" v-model="targetCategory">
+            <el-option v-for="(category,index) in categoryList.slice(0,categoryList.length)" :key="index"
+            :label="category.categoryName" :value="category.categoryId" />
+        </el-select>
+    </div>
+    <template #footer>
+    <div class="dialog-footer">
+        <el-button @click="moveFlag = false">取消</el-button>
+        <el-button type="primary" @click="moveUser()">
+            添加 
+        </el-button>
+    </div>
+    </template>
+</el-dialog>
 </template>
 
 <style scoped>
@@ -369,5 +658,36 @@ const getShowDetail = async (name : any) => {
 }
 :deep(.el-checkbox__label){
     margin-left:15px;
+}
+.categoryInput{
+    width:280px;
+    height: 32px;
+    background: #FFFFFF;
+    border-radius: 10px;
+    margin-left:30px;
+}
+.roleSelect{
+    width: 300px;
+    height: 32px;
+    background: #FFFFFF;
+    border-radius: 10px;
+    margin-left:30px;
+}
+.Tabs{
+    width:1000px;
+}
+.dialogTitle{
+    font-size:20px;
+    line-height: 100%;
+    font-weight:bold;
+    display:flex;
+}
+.dialogSpan{
+    width: 6px !important;
+    height: 25px;
+    display: block;
+    margin-right:18px;
+    background-color:#00a1e9;
+    margin-right:5px !important;
 }
 </style>

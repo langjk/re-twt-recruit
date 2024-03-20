@@ -13,7 +13,7 @@ const TWT:string = globalVars.TWT;
 const changeDialogVisible = ref(false)
 const tableData = ref<author[]>([])
 const refreshList = () => {
-    http.get("/v1/organ/members", {}).then((res:{code:number,result:any})=>{
+    http.get("/v1/staff/members", {}).then((res:{code:number,result:any})=>{
         if(res.code == 200){
             tableData.value = res.result
         }
