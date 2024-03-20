@@ -4,7 +4,7 @@ export default {
 }
 </script>
 <script setup lang="ts" name="projectSideBar">
-import { inject, ref } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { useRoute } from 'vue-router'
 import http from '@/utils/http'
 
@@ -13,7 +13,16 @@ type gloVar = {
     lightTWT:string
 }
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
-const TWT:string = globalVars.TWT;
+const TWT=ref('')
+const lightTWT=ref('')
+TWT.value = globalVars.TWT;
+lightTWT.value =globalVars.lightTWT;
+watch(() => globalVars.TWT, (newValue) => {
+    TWT.value = newValue
+})
+watch(() => globalVars.lightTWT, (newValue) => {
+    lightTWT.value =newValue
+})
 const route = useRoute();
 var projectId = route.params.projectId
 
@@ -101,5 +110,13 @@ http.get("/v1/user/project", {projectId:projectId
 }
 .el-menu{
     border-right: solid 0.05vw var(--el-menu-border-color);
+}
+:deep(.el-menu--horizontal>.el-menu-item.is-active){
+    color:v-bind(TWT) !important;
+}
+:deep(.el-menu-item.is-active){
+    background-color:v-bind(lightTWT) !important;
+    color:v-bind(TWT) !important;
+    border-right:2px solid v-bind(TWT) !important;
 }
 </style>

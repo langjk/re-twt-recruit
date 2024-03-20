@@ -4,17 +4,25 @@ export default {
 }
 </script>
 <script setup lang="ts" name="appSideBar">
-import { inject, computed } from 'vue';
+import { inject, computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex';
 const store = useStore(); 
-
 type gloVar = {
     TWT:string,
     lightTWT:string
 }
 const globalVars:gloVar = inject<gloVar>('globalVars')!;
-const TWT:string = globalVars.TWT;
+const TWT=ref('')
+const lightTWT=ref('')
+TWT.value = globalVars.TWT;
+lightTWT.value =globalVars.lightTWT;
+watch(() => globalVars.TWT, (newValue) => {
+    TWT.value = newValue
+})
+watch(() => globalVars.lightTWT, (newValue) => {
+    lightTWT.value =newValue
+})
 const route = useRoute();
 var clubName = localStorage.getItem('clubName')
 var userScale = localStorage.getItem('scale')
@@ -39,7 +47,7 @@ const Scale = computed(() => store.state.scale);
                 项目管理
             </el-menu-item>
             <el-menu-item class="menuItem" index="/applymanage/authoritymanage">
-                权限管理
+                人员管理
             </el-menu-item>
         </el-menu>
     </div>
@@ -87,5 +95,13 @@ const Scale = computed(() => store.state.scale);
 }
 .el-menu{
     border-right: solid 0.05vw var(--el-menu-border-color);
+}
+:deep(.el-menu--horizontal>.el-menu-item.is-active){
+    color:v-bind(TWT) !important;
+}
+:deep(.el-menu-item.is-active){
+    background-color:v-bind(lightTWT) !important;
+    color:v-bind(TWT) !important;
+    border-right:2px solid v-bind(TWT) !important;
 }
 </style>

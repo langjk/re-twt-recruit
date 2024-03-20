@@ -2,6 +2,7 @@
 import { inject, ref, onMounted } from 'vue';
 import projectSideBar from '@/components/applyManage/projectManage/projectSideBar.vue'
 import http from '@/utils/http'
+import detailBar from '@/components/manageDetail/detailBar.vue';
 import { useRoute } from 'vue-router';
 const route = useRoute();
 type gloVar = {
@@ -20,12 +21,28 @@ const timeSelect = ref(0) //当前选择的时间段
 const countData = ref<any>([]) // 各面试时间的人数
 const categoryList = ref<any>([]) //各组别的分类数据
 const categorySelect = ref<number>(0) //当前选择的分类
+const daySelect = ref<number>(0)
 const interviewCount = ref<number[]>([0,0,0]) //各面试进度人数
 const interviewType = ref<any>(0) //当前选择的面试进度类型
 const nowTableData = ref<any>([]) //当前页面人员展示表格数据，和tableData区分开
 //各面试时间、面试进度人数单独储存(countData,interviewCount)，不要使用{{插值}}，防止http获取数据失败产生0值报错
-const activeName = ref<any>([]) //选取展示详情的人员
-const showDetail = ref<any>() //展示的信息
+const activeName = ref<any>(0) //选取展示详情的人员
+export type Detail = {
+    createdTime: string,
+    DepartmentAndMajor: string,
+    contact: string,
+    groups: any[],
+    questions: [],
+    comments: []
+}
+const showDetail = ref<Detail>({
+    createdTime: '',
+    DepartmentAndMajor: '',
+    contact: '',
+    groups: [],
+    questions: [],
+    comments: []
+}) //展示的信息
 const fetchTimeData = async () => {
 await http.get("/v1/user/project", {projectId:projectId
     }).then((res:{code:number,result:any})=>{
@@ -39,7 +56,7 @@ await  http.get("/v1/staff/category/detail", {projectId:projectId
         if(res.code == 200){
             tableData.value = res.result
             for(let i = 0;i<tableData.value.length;i++)
-                countData.value[i] = tableData.value[i].count
+                countData.value[i] = tableData.value[i][daySelect.value].count
         }
     });
 }
@@ -60,17 +77,25 @@ const changeSlot = (slot:number) => {
 //if == 1用来判断这个时间段是否在该问卷的面试时间内，如果在面试时间就将时间段移到这里
 //用于刷新选择区域和防止选中到非面试时间
             timeSelect.value = i + slot * 5;
-            nowTableData.value = tableData.value[timeSelect.value].applications
+            nowTableData.value = tableData.value[timeSelect.value][daySelect.value].applications
             return
         }
     }
+}
+
+//改变日期函数
+const changeDay = (day:number) => {
+    daySelect.value = day;
+    for(let i = 0;i<tableData.value.length;i++)
+        countData.value[i] = tableData.value[i][daySelect.value].count
+    changeSlot(0);
 }
 
 //改变选择时间函数 同时更新人员显示
 const changeTime = (time:number) => {
     if(timeQuest.value[time] == 1){
         timeSelect.value = time
-        nowTableData.value = tableData.value[timeSelect.value].applications
+        nowTableData.value = tableData.value[timeSelect.value][daySelect.value].applications
         activeName.value = 0
         //当前显示的人员应当是：人员数据[选中的面试时间].applications
     }
@@ -80,7 +105,7 @@ const changeTime = (time:number) => {
 const getCategory = (pane: any) => {
     if(pane.index == 0){
         fetchTimeData();
-        return
+        changeSlot(0);
     }
     else{
         var groupId = groups.value[pane.index-1].groupId
@@ -98,6 +123,16 @@ const getCategory = (pane: any) => {
             }
         });
     }
+    console.log('!!')
+    activeName.value = 0
+    showDetail.value = {
+        createdTime: '',
+        DepartmentAndMajor: '',
+        contact: '',
+        groups: [],
+        questions: [],
+        comments: []
+    }
 }
 
 //改变面试进度函数 同时更新人员显示
@@ -109,17 +144,29 @@ const changeInter = (type:number) => {
 }
 
 //获取人员详细问卷信息
-const getShowDetail = (name : any) => {
+const getShowDetail = async (name : any) => {
     if(name){
-        http.get("/v1/staff/applications", {applicationIds:name
+        await http.get("/v1/staff/applications", {applicationIds:name
             }).then((res:{code:number,result:any})=>{
                 if(res.code == 200){
-                    showDetail.value = res.result
+                    console.log(res.result[0])
+                    showDetail.value.createdTime = res.result[0].createdTime.slice(0,10) +' ' +  res.result[0].createdTime.slice(11,19)
+                    showDetail.value.DepartmentAndMajor = res.result[0].department + '-' + res.result[0].major
+                    showDetail.value.contact = res.result[0].applicationCampus + '-' + res.result[0].applicationContact
+                    showDetail.value.groups = res.result[0].groups
+                    showDetail.value.comments = res.result[0].comments
                 }
             });
     }
     else
-        showDetail.value = {}
+        showDetail.value = {
+            createdTime: '',
+            DepartmentAndMajor: '',
+            contact: '',
+            groups: [],
+            questions: [],
+            comments: []
+        }
 }
 </script>
 
@@ -131,6 +178,12 @@ const getShowDetail = (name : any) => {
         <el-main style="padding:0;overflow:hidden">
             <el-tabs type="border-card"  @tab-click="getCategory">
                 <el-tab-pane label="全部" @tab-click="fetchTimeData()">
+                        <div class="tab-title">选择天数</div>
+                        <div class="tab-buttonContainer">
+                            <div :class="(daySelect == 0) ? 'active' : 'normal'" @click="changeDay(0)">第一天</div>
+                            <div :class="(daySelect == 1) ? 'active' : 'normal'" @click="changeDay(1)">第二天</div>
+                            <div :class="(daySelect == 2) ? 'active' : 'normal'" @click="changeDay(2)">第三天</div>
+                        </div>
                         <div class="tab-title">选择时段</div>
                         <div class="tab-buttonContainer">
                             <div :class="(timeSlotSelect == 0) ? 'active' : 'normal'" @click="changeSlot(0)">上午</div>
@@ -153,13 +206,13 @@ const getShowDetail = (name : any) => {
                             <el-collapse-item v-for="(item,index) in nowTableData" :key="index" :name="item.applicationId">
                                 <template #title>
                                     <el-row style="width:100%">
-                                        <el-col style="font-weight: bold;" :span="4">{{item.applicationName}}</el-col>
+                                        <el-col style="font-weight: bold;text-align:left" :span="4">{{item.applicationName}}</el-col>
                                         <el-col :span="10">{{item.comment}}</el-col>
                                         <el-col :span="6">{{item.commentTime}}</el-col>
                                         <el-col style="text-align:right" :span="4">查看更多</el-col>
                                     </el-row>
                                 </template>
-                                {{ showDetail }}
+                                <detailBar v-model="showDetail" ></detailBar>
                             </el-collapse-item>
                         </el-collapse>
                 </el-tab-pane>
@@ -182,25 +235,33 @@ const getShowDetail = (name : any) => {
                             </div>
                         </div>
                         <el-row class="buttonContainer">
-                            <el-checkbox>全选</el-checkbox>
-                            <div>已选2项</div>
-                            <el-button class="button">复制</el-button>
-                            <el-button class="button">移动</el-button>
-                            <el-button class="button">发送短信</el-button>
-                            <el-button class="button">导出信息</el-button>
+                            <el-col :span="14" style="justify-items:left"><el-checkbox>全选</el-checkbox></el-col>
+                            <el-col :span="10">
+                                <el-button class="button">复制</el-button>
+                                <el-button class="button">移动</el-button>
+                                <el-button class="button">发送短信</el-button>
+                                <el-button class="button">导出信息</el-button>
+                            </el-col>
                         </el-row>
                         <el-collapse class="collapse" accordion @change="getShowDetail" v-model="activeName">
-                            <el-collapse-item v-for="(item,index) in nowTableData" :key="index" :name="item.applicationId">
-                                <template #title>
-                                    <el-row style="width:100%">
-                                        <el-col style="font-weight: bold;" :span="4">{{item.applicationName}}</el-col>
-                                        <el-col :span="10">{{item.comment}}</el-col>
-                                        <el-col :span="6">{{item.commentTime}}</el-col>
-                                        <el-col style="text-align:right" :span="4">查看更多</el-col>
-                                    </el-row>
-                                </template>
-                                {{ showDetail }}
-                            </el-collapse-item>
+                            <el-row style="align-items: flex-start;" v-for="(item,index) in nowTableData" :key="index">
+                                <el-col :span="1">
+                                    <el-checkbox class="checkbox"></el-checkbox>
+                                </el-col>
+                                <el-col :span="23">
+                                    <el-collapse-item :name="item.applicationId">
+                                        <template #title>
+                                            <el-row style="width:100%">
+                                                <el-col style="font-weight: bold;text-align:left" :span="4">{{item.applicationName}}</el-col>
+                                                <el-col :span="10">{{item.comment}}</el-col>
+                                                <el-col :span="6">{{item.commentTime}}</el-col>
+                                                <el-col style="text-align:right" :span="4">查看更多</el-col>
+                                            </el-row>
+                                        </template>
+                                        <detailBar v-model="showDetail" ></detailBar>
+                                    </el-collapse-item>
+                                </el-col>
+                            </el-row>
                         </el-collapse>
                 </el-tab-pane>
             </el-tabs>
@@ -291,16 +352,22 @@ const getShowDetail = (name : any) => {
     color:#444444;
 }
 .collapse{
-    width:910px
+    width:900px;
+    margin:0 10px;
+}
+.collapse .checkbox{
+    margin-top:7px;
+}
+:deep(.el-collapse-item__header){
+    font-size:18px;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 .buttonContainer{
-    margin:70px 49px 24px 20px;
+    margin:0 0 15px 10px;
 }
-.button{
-    width: 96px;
-    height: 40px;
-    background: #FFFFFF;
-    box-shadow: 0px 1px 4px 0px rgba(92,92,92,0.12);
-    border-radius: 20px;
+:deep(.el-checkbox__label){
+    margin-left:15px;
 }
 </style>

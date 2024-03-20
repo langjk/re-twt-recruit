@@ -56,23 +56,31 @@ delete(
     config?: AxiosRequestConfig
 ): Promise<AxiosResponse>;
 }
-const http: Http = {
-get(url, data, config) {
+const http: any = {
+get(url:any, data:any, config:any) {
     return instance.get(url, {
     params: data,
     ...config,
     });
 },
-post(url, data, config) {
+getFile(url:any, data:any, config:any) {
+    const requestConfig = {  
+        params: data,  
+        responseType: 'blob', // 指定响应类型为blob  
+        ...config,  
+    };  
+    return instance.get(url, requestConfig)
+},
+post(url:any, data:any, config:any) {
     return instance.post(url, data, config);
 },
-put(url, data, config) {
+put(url:any, data:any, config:any) {
     return instance.put(url, data, config);
 },
-patch(url, data, config) {
+patch(url:any, data:any, config:any) {
     return instance.patch(url, data, config);
 },
-delete(url, data, config) {
+delete(url:any, data:any, config:any) {
     return instance.delete(url, {
     data,
     ...config,

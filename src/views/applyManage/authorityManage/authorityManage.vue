@@ -84,17 +84,26 @@ const handleDelete = async (row: any) => {
         <el-main style="padding:0;overflow:hidden">
             <div class="blockContainer">
                 <el-row class="manageContainer">
-                    <el-input v-model="uid" class="numberInput" placeholder="请输入添加成员的学号" />
-                    <el-select class="roleSelect" v-model="roleSelect">
-                        <el-option v-for="(option,index) in roles" :key="index"
-                        :label="option.valueOf()" :value="index" />
-                    </el-select>
-                    <el-button class="defaultButton" @click="addMember()" type="primary">添加</el-button>
-                    <el-button class="defaultButton">表格导入</el-button>
+                    <el-col :span="5">
+                        <el-input v-model="uid" class="numberInput" placeholder="请输入添加成员的学号" />
+                    </el-col>
+                    <el-col :span="5">
+                        <el-select class="roleSelect" v-model="roleSelect">
+                            <el-option v-for="(option,index) in roles" :key="index"
+                            :label="option.valueOf()" :value="index" />
+                        </el-select>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-button class="defaultButton" @click="addMember()" type="primary">添加</el-button>
+                    </el-col>
+                    <el-col :span="3" />
+                    <el-col :span="3">
+                        <el-button class="defaultButton">表格导入</el-button>
+                    </el-col>
                 </el-row>
                 <el-table :data="tableData" stripe style="width: 100%" class="table">
-                    <el-table-column prop="name" label="用户" width="180" />
-                    <el-table-column prop="uid" label="学号" width="180" />
+                    <el-table-column prop="name" label="用户" />
+                    <el-table-column prop="uid" label="学号" />
                     <el-table-column prop="role" label="权限">
                         <template #default="scope">
                             {{ roles[scope.row.role as keyof typeof roles] }} <!--逆天eslint怎么不去死啊？？-->
@@ -155,7 +164,6 @@ const handleDelete = async (row: any) => {
     border-radius: 10px;
 }
 .numberInput{
-    width: 240px;
     height: 32px;
     background: #FFFFFF;
     border-radius: 10px;
@@ -170,11 +178,9 @@ const handleDelete = async (row: any) => {
     height: 32px;
     background: #FFFFFF;
     border-radius: 10px;
-    margin-left:24px;
 }
 .defaultButton{
     width: 100px;
-    margin-left:24px;
 }
 .space{
     gap:3px 0px !important;

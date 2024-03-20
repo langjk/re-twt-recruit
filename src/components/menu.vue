@@ -123,6 +123,6 @@ const checkLogin = () => {
 :deep(.el-menu-item.is-active){
     background-color:v-bind(lightTWT) !important;
     color:v-bind(TWT) !important;
-    border-bottom:1px solid v-bind(TWT) !important;
+    border-bottom:3px solid v-bind(TWT) !important;
 }
 </style>

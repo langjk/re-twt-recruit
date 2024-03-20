@@ -96,7 +96,7 @@ const baseurl = import.meta.env.VITE_API_URL
     font-weight: 600;
     color: #444444;
     overflow:hidden;
-    white-space: nowarp;
+    white-space: nowrap;
     text-overflow: ellipsis;
 }
 .recruit .org{
