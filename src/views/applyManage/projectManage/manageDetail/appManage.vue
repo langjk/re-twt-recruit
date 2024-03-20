@@ -43,11 +43,17 @@ const newCategoryFlag = ref<boolean>(false)
 const moveFlag = ref<boolean>(false)
 const copyFlag = ref<boolean>(false)
 const sendFlag = ref<boolean>(false)
-const exportFlag = ref<boolean>(false)
 //-----------------------------------------
 
 const categoryName = ref<string>('') //新增分类的名称
 const targetCategory = ref<string>('') //复制、移动的目标分类
+
+const messageTitle = ref<string>('')
+const messageContent = ref<string>('')
+const messagePreview = ref<string>('')
+const clubName = ref<string>('')
+const projectTitle = ref<string>('')
+const startTime = ref<string>('')
 
 export type Detail = {
     createdTime: string,
@@ -71,6 +77,9 @@ await http.get("/v1/user/project", {projectId:projectId
         if(res.code == 200){
             groups.value = res.result.groups
             timeQuest.value = JSON.parse(res.result.rules).time
+            clubName.value = res.result.clubName
+            projectTitle.value = res.result.title
+            startTime.value = res.result.startTime
         }
     });
 await  http.get("/v1/staff/category/detail", {projectId:projectId
@@ -295,7 +304,18 @@ const moveUser = () => {
 
 //发送短信
 const sendMessage = () => {
-    console.log(getId())
+    var applicationId = getId()
+    http.post("/v1/inter/message/send", {
+        projectId:projectId,
+        title:messageTitle.value,
+        userReceive:applicationId,
+        content:messageContent.value
+    }).then((res:{code:number,result:any})=>{
+        if(res.code == 200){
+            ElMessage.success('发送消息成功！')
+            sendFlag.value = false
+        }
+    });
 }
 
 //导出信息
@@ -361,6 +381,18 @@ const changeCategory = (index:number) => {
         userSelect.value[i] = false
     }
     isAllSelect.value =  false;
+}
+
+//处理发送消息
+const handleMessage = () => {
+    var userNamePattern = /{{userName}}/g;
+    var clubNamePattern = /{{clubName}}/g;
+    var projectNamePattern = /{{projectName}}/g;
+    var interviewTimePattern = /{{interviewTime}}/g;
+    messagePreview.value = messageContent.value.replace(userNamePattern, '小明');
+    messagePreview.value = messagePreview.value.replace(clubNamePattern, clubName.value);
+    messagePreview.value = messagePreview.value.replace(projectNamePattern, projectTitle.value);
+    messagePreview.value = messagePreview.value.replace(interviewTimePattern, startTime.value);
 }
 </script>
 
@@ -436,7 +468,7 @@ const changeCategory = (index:number) => {
                             <el-col :span="10">
                                 <el-button class="button" @click="copyFlag = true">复制</el-button>
                                 <el-button class="button" @click="moveFlag = true">移动</el-button>
-                                <el-button class="button" @click="sendMessage">发送短信</el-button>
+                                <el-button class="button" @click="sendFlag = true">发送短信</el-button>
                                 <el-button class="button" @click="exportData">导出信息</el-button>
                             </el-col>
                         </el-row>
@@ -447,7 +479,7 @@ const changeCategory = (index:number) => {
                                 </el-col>
                                 <el-col :span="23">
                                     <el-collapse-item :name="item.applicationId">
-                                        <template #title>
+                                        <template #title> 
                                             <el-row style="width:100%">
                                                 <el-col style="font-weight: bold;text-align:left" :span="4">{{item.applicationName}}</el-col>
                                                 <el-col :span="10">{{item.comment}}</el-col>
@@ -536,23 +568,47 @@ const changeCategory = (index:number) => {
 </el-dialog>
 
 <!--发送信息弹窗-->
-<el-dialog v-model="moveFlag" >
+<el-dialog v-model="sendFlag" style="width:35vw !important;border-radius:0.3vw;height:auto">
     <template #header>
-        <div class="dialogTitle">发送消息
+        <div class="dialogTitle">
+            <div class="dialogSpan"/>发送消息
         </div> 
     </template>
-    <div style="display:flex;justify-content:center;align-items:center">
-        <span style="font-weight:bold">分类名称</span>
-        <el-select class="roleSelect" v-model="targetCategory">
-            <el-option v-for="(category,index) in categoryList.slice(0,categoryList.length)" :key="index"
-            :label="category.categoryName" :value="category.categoryId" />
-        </el-select>
-    </div>
+    <el-space class="messageSpace" direction="vertical">
+        <div style="display:flex;justify-content:left;align-items:center">
+            <span style="font-weight:bold">消息标题</span>
+            <el-input class="messageInput" v-model="messageTitle" />
+        </div>
+        <div style="display:flex;justify-content:left;">
+            <span style="font-weight:bold">消息内容</span>
+            <el-input class="messageInput" @input="handleMessage()" v-model="messageContent" :rows="5" type="textarea"/>
+        </div>
+        <el-collapse class="messageHint">
+            <el-collapse-item title="内容模板提示"  >
+                <el-card style="max-width: 480px">
+                    <template #header>
+                        您可以使用以下几种<span style="color:#dc5c5c">规定模板</span>来填充发送的信息，目前开放以下四种模板
+                    </template>
+                    <div v-pre><span style="color:#dc5c5c">{{userName}}</span>将填充对方姓名 </div>
+                    <div v-pre><span style="color:#dc5c5c">{{clubName}}</span>将填充您的社团名称</div>
+                    <div v-pre><span style="color:#dc5c5c">{{projectName}}</span>将填充本项目名称</div>
+                    <div v-pre><span style="color:#dc5c5c">{{interviewTime}}</span>将填充对方的面试时间</div>
+                    <template #footer>
+                        您可以在下方消息预览窗口看到经过填充后的信息，以便检查模板是否输入正确
+                    </template>
+                </el-card>
+            </el-collapse-item>
+        </el-collapse>
+        <div style="display:flex;justify-content:left;">
+            <span style="font-weight:bold">消息预览</span>
+            <el-input class="messageInput" v-model="messagePreview" :rows="5" type="textarea" disabled />
+        </div>
+    </el-space>
     <template #footer>
     <div class="dialog-footer">
-        <el-button @click="moveFlag = false">取消</el-button>
-        <el-button type="primary" @click="moveUser()">
-            添加 
+        <el-button @click="sendFlag = false">取消</el-button>
+        <el-button type="primary" @click="sendMessage()">
+            发送 
         </el-button>
     </div>
     </template>
@@ -689,5 +745,23 @@ const changeCategory = (index:number) => {
     margin-right:18px;
     background-color:#00a1e9;
     margin-right:5px !important;
+}
+.messageSpace{
+    gap:20px 0px !important;
+    margin-left:20px;
+    font-size:16px !important;
+}
+.messageInput{
+    display: block;
+    margin-left:20px;
+    width:500px;
+}
+.messageHint{
+    margin-left:85px;
+    width:500px;
+}
+:deep(.el-textarea.is-disabled .el-textarea__inner){
+    color:#444444;
+    background-color:white
 }
 </style>

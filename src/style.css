@@ -53,5 +53,5 @@ body {
   border-top: 0.05vw var(--el-border-color) var(--el-border-style);
 }
 .el-dialog{
-  width:450px !important;
+  width:450px;
 }
