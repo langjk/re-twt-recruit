@@ -4,7 +4,7 @@ export default {
 }//面试控制页面搜索结果用组件
 </script>
 <script setup lang="ts" name="messageBar">
-import { inject, ref } from 'vue';
+import { inject } from 'vue';
 type gloVar = {
     TWT:string,
     lightTWT:string

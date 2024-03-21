@@ -4,19 +4,14 @@ export default {
 }//面试控制页面搜索结果用组件
 </script>
 <script setup lang="ts" name="searchBar">
-import { inject, ref } from 'vue';
+import { ref } from 'vue';
 import { memberData } from '@/views/applyManage/projectManage/manageDetail/interviewControl.vue';
-type gloVar = {
-    TWT:string,
-    lightTWT:string
-}
-const globalVars:gloVar = inject<gloVar>('globalVars')!;
-const TWT:string = globalVars.TWT;
+
 const model = defineModel<memberData>({default:{showDetail:{}}})
 const groupSelect = ref<any>(0) //选择的组别
 </script>
 <template>
-    <el-row class="barContainer">
+    <el-row class="barContainer" v-if="model.groups">
         <el-col :span="2">
             <div class="icon">
                 <el-icon><User /></el-icon>

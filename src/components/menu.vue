@@ -50,15 +50,6 @@ var accountType = Number(localStorage.getItem('accountType'))
 if(accountType)
     store.commit('SET_USER_TYPE', accountType); 
 var Type = computed(() => store.state.accountType);
-// const checkLogin = () => {
-//     if(!userInfo){
-//         localStorage.clear();
-//         router.push('/Login');
-//     }
-//     else{
-//         router.push('/myApplication')
-//     }
-// }
 </script>
 
 <template>

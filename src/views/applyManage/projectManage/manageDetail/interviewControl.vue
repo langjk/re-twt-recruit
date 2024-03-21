@@ -60,8 +60,8 @@ onMounted(async () => {
                     <el-button class="button" type="primary" @click="fetchData(searchText)">查询</el-button>
                 </el-row>
                 <el-space  direction="vertical" alignment="left" class="space">
-                    <div v-for="( data, index ) in searchData" :key="index">
-                        <searchBar v-model="searchData[index]" ></searchBar>
+                    <div v-for="index in searchData.length" :key="index">
+                        <searchBar v-model="searchData[index-1]" ></searchBar>
                         <el-divider />
                     </div>
                 </el-space>

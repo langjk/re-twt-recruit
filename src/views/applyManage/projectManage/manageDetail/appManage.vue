@@ -528,8 +528,8 @@ const handleMessage = () => {
     </template>
     <div style="display:flex;justify-content:center;align-items:center">
         <span style="font-weight:bold">分类名称</span>
-        <el-select class="roleSelect" v-model="targetCategory">
-            <el-option v-for="(category,index) in categoryList.slice(0,categoryList.length)" :key="index"
+        <el-select class="roleSelect" v-model="targetCategory"> <!--slice1跳过全部组别👇-->
+            <el-option v-for="(category,index) in categoryList.slice(1,categoryList.length)" :key="index"
             :label="category.categoryName" :value="category.categoryId" />
         </el-select>
     </div>
@@ -552,8 +552,8 @@ const handleMessage = () => {
     </template>
     <div style="display:flex;justify-content:center;align-items:center">
         <span style="font-weight:bold">分类名称</span>
-        <el-select class="roleSelect" v-model="targetCategory">
-            <el-option v-for="(category,index) in categoryList.slice(0,categoryList.length)" :key="index"
+        <el-select class="roleSelect" v-model="targetCategory"> <!--slice1跳过全部组别👇-->
+            <el-option v-for="(category,index) in categoryList.slice(1,categoryList.length)" :key="index"
             :label="category.categoryName" :value="category.categoryId" />
         </el-select>
     </div>

@@ -19,17 +19,19 @@ const lightTWT:string =globalVars.lightTWT;
 
 interface PropsMore {
     recruit: Recruit[],
-    total:number
+    total:number,
+    type:number
 }
 const props = defineProps<PropsMore>()
-const emit = defineEmits(['changePage'])
+const scaleType = ref<number>(0)
+scaleType.value = props.type
+const emit = defineEmits(['changePage','getBack'])
 const currentPage = ref(1)
 const changePage = (page:number) => {
     currentPage.value = page
-    emit('changePage', page)
+    emit('changePage', page, scaleType.value, statusType.value)
 }
-const scaleType = ref(0)
-const statusType = ref(0)
+const statusType = ref()
 const router = useRouter();
 const gotoUpload = (index:number) => {
     const url = router.resolve(
@@ -43,25 +45,29 @@ const gotoUpload = (index:number) => {
     window.open(url, '_blank');
 }
 const baseurl = import.meta.env.VITE_API_URL
+const goBack = () => {
+    emit('getBack')
+}
 </script>
 <template>
     <div class="optionContainer">
         <el-row class="recruitTitle">
             <span></span>
             招募列表
+            <el-button class="goBack" @click="goBack()">回首页</el-button>
         </el-row>
-        <el-form class="form"> 
+        <el-form class="form">
             <el-form-item label="招募范围">
-                <el-radio-group v-model="scaleType" class="radio-group">
-                    <el-radio value="1" size="large">校级招募</el-radio>
-                    <el-radio value="0" size="large">院级招募</el-radio>
+                <el-radio-group v-model="scaleType" class="radio-group" @change="changePage(currentPage)">
+                    <el-radio :label="1" size="large">校级招募</el-radio>
+                    <el-radio :label="0" size="large">院级招募</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="招募状态">
-                <el-radio-group v-model="statusType" class="radio-group">
-                    <el-radio value="" size="large">全部</el-radio>
-                    <el-radio value="0" size="large">正在招募</el-radio>
-                    <el-radio value="2" size="large">停止招募</el-radio>
+                <el-radio-group v-model="statusType" class="radio-group" @change="changePage(currentPage)">
+                    <el-radio  size="large">全部</el-radio>
+                    <el-radio :label="0" size="large">正在招募</el-radio>
+                    <el-radio :label="2" size="large">停止招募</el-radio>
                 </el-radio-group>
             </el-form-item>
         </el-form>
@@ -160,5 +166,13 @@ const baseurl = import.meta.env.VITE_API_URL
 }
 .radio-group{
     margin-left:20px;
+}
+.goBack{
+    margin-left:30px;
+    margin-top:15px;
+    font-size:14px;
+    font-weight:400;
+    color:v-bind(TWT);
+    cursor: pointer;
 }
 </style>

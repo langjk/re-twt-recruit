@@ -1,7 +1,7 @@
 {
   "name": "re-twt-recruit",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,7 +13,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.11.14",
     "axios": "^1.6.7",
-    "element-plus": "^2.5.3",
+    "element-plus": "^2.6.1",
     "js-cookie": "^3.0.5",
     "md-editor-v3": "^4.11.2",
     "postcss-load-config": "^5.0.2",

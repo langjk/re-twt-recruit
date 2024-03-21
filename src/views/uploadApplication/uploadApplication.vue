@@ -196,8 +196,7 @@ const campusOption = ['卫津路校区','北洋园校区']
                     <el-checkbox
                         v-for="group in groups"
                         :key="group.groupId"
-                        :label="group.groupId"
-                        :true-value="group.groupId"
+                        :value="group.groupId"
                         >{{group.groupName}}</el-checkbox>
                 </el-checkbox-group>
             </div>
@@ -213,7 +212,7 @@ const campusOption = ['卫津路校区','北洋园校区']
                                 <div  v-if="timeQuest.time[index-1]">
                                     <el-divider></el-divider>
                                     <el-checkbox style="width:100%"
-                                    :label="(index+6)+':00-'+(index+7)+':00'" value="Value A" />
+                                    :label="(index+6)+':00-'+(index+7)+':00'"/>
                                 </div>
                             </div>
                         </el-checkbox-group>
@@ -226,7 +225,7 @@ const campusOption = ['卫津路校区','北洋园校区']
                                     <div  v-if="timeQuest.time[index+4]">
                                         <el-divider></el-divider>
                                         <el-checkbox style="width:100%"
-                                        :label="(index+11)+':00-'+(index+12)+':00'" value="Value A" />
+                                        :label="(index+11)+':00-'+(index+12)+':00'"/>
                                     </div>
                                 </div>
                             </el-checkbox-group>
@@ -239,7 +238,7 @@ const campusOption = ['卫津路校区','北洋园校区']
                                     <div  v-if="timeQuest.time[index+9]">
                                         <el-divider></el-divider>
                                         <el-checkbox style="width:100%"
-                                        :label="(index+16)+':00-'+(index+17)+':00'" value="Value A" />
+                                        :label="(index+16)+':00-'+(index+17)+':00'"/>
                                     </div>
                                 </div>
                             </el-checkbox-group>
