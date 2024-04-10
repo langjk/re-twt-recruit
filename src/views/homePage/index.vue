@@ -8,8 +8,10 @@ import http from '@/utils/http'
 const schoolRecruit = ref<Recruit[]>([])
 const departmentRecruit = ref<Recruit[]>([])
 const showAll = ref<Recruit[]>([])
-const showTotal = ref(0)
-const showType = ref(2) //2:各五个，0/1：显示更多
+const showTotal = ref<number>(0)
+const showType = ref<number>(2) //2:各五个，0/1：显示更多
+const nowType = ref<number>(0) //0院级 1校级
+
 http.get("/v1/user/project/all", {status:0,page:1,pageSize:5,scale:0
         }).then((res:{code:number,result:any})=>{
             if(res.code == 200){
@@ -30,8 +32,10 @@ const globalVars:gloVar = inject<gloVar>('globalVars')!;
 const TWT:string = globalVars.TWT;
 const lightTWT:string =globalVars.lightTWT;
 lightTWT;TWT
-const showMore = async(type:number,page:number) => {
-    await http.get("/v1/user/project/all", {status:0,page:page,pageSize:10,scale:type
+
+const showMore = async(type:number,page:number,statusType:number) => {
+    nowType.value = type
+    await http.get("/v1/user/project/all", {status:statusType,page:page,pageSize:10,scale:type
         }).then((res:{code:number,result:any})=>{
             if(res.code == 200){
                 showAll.value = res.result.records
@@ -40,8 +44,8 @@ const showMore = async(type:number,page:number) => {
             }
         });
 }
-const handlePageChange = (page:number) => {
-    showMore(showType.value,page)
+const handlePageChange = (page:number, type:number, statusType:number) => {
+    showMore(type,page,statusType)
 }
 </script>
 
@@ -49,12 +53,12 @@ const handlePageChange = (page:number) => {
     <div class="cover" v-if="showType == 2"></div>
     <div v-if="showType == 2">
         <recruitList :title="'院级招募'" :recruit="departmentRecruit" />
-        <el-button class="button" @click="showMore(0,1)">查看更多</el-button>
+        <el-button class="button" @click="showMore(0,1,0)">查看更多</el-button>
         <recruitList :title="'校级招募'" :recruit="schoolRecruit" />
-        <el-button class="button" @click="showMore(1,1)">查看更多</el-button>
+        <el-button class="button" @click="showMore(1,1,0)">查看更多</el-button>
     </div>
     <div v-if="showType < 2">
-        <recruitMore :recruit="showAll" :total="showTotal" @changePage="handlePageChange"></recruitMore>
+        <recruitMore :recruit="showAll" :total="showTotal" :type="nowType" @changePage="handlePageChange" @getBack="showType = 2"></recruitMore>
     </div>
     <div style="height:200px"></div>
 </template>

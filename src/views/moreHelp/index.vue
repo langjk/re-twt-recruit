@@ -2,6 +2,7 @@
 import { inject,ref } from 'vue';
 const lightcolor = ref('')
 const color = ref('')
+const backColor = ref('#f2f2f2')
 type gloVar = {
     TWT:string,
     lightTWT:string
@@ -11,9 +12,13 @@ lightcolor.value = globalVars.lightTWT;
 color.value  = globalVars.TWT;
 const changeColor = () => {
     globalVars.TWT = color.value
+    document.documentElement.style.setProperty('--el-color-primary', color.value);
 }
 const changeLightColor = () => {
     globalVars.lightTWT = lightcolor.value
+}
+const changebackColor = () => {
+    document.documentElement.style.setProperty('--background-color', backColor.value);
 }
 </script>
 
@@ -23,8 +28,9 @@ const changeLightColor = () => {
             <h3>测试功能</h3>
             <h1>主题颜色</h1>
             <div>
-                <el-color-picker v-model="color" @change="changeColor()" size="large" />
-                <el-color-picker v-model="lightcolor" @change="changeLightColor()" size="large" />
+                主题色<el-color-picker v-model="color" @change="changeColor()" size="large" />
+                浅主题色<el-color-picker v-model="lightcolor" @change="changeLightColor()" size="large" />
+                背景色<el-color-picker v-model="backColor" @change="changebackColor()" size="large" />
             </div>
         </div>
     </div>

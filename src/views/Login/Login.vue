@@ -19,13 +19,30 @@ const TWT:string = globalVars.TWT;
         {account:account.value,password:password.value, })
         .then((res:{code:number,result:any})=>{
             if(res.code == 200){ 
-                store.commit('SET_USER_INFO', res.result.name); 
+                store.commit('SET_USER_TYPE', res.result.accountType); 
                 localStorage.setItem('token', res.result.token);
-                localStorage.setItem('nickname', res.result.name);
                 localStorage.setItem('accountType', res.result.accountType);
-                if(res.result.accountType > 1){
-                    localStorage.setItem('clubId',res.result.clubId)
-                    localStorage.setItem('scale',res.result.scale)
+                if(res.result.accountType == 1){
+                    store.commit('SET_USER_INFO', res.result.name); 
+                    localStorage.setItem('nickname', res.result.name);
+                    localStorage.setItem('uid', res.result.uid);
+                    localStorage.setItem('major', res.result.major);
+                    localStorage.setItem('grade', res.result.uid.slice(2,4) + '级');
+                    localStorage.setItem('department', res.result.department);
+                    localStorage.setItem('telephone', res.result.telephone);
+                    localStorage.setItem('email', res.result.email);
+                    localStorage.setItem('campus', res.result.campus);
+                    localStorage.setItem('stuType', res.result.stuType);
+                }
+                else if(res.result.accountType > 1){
+                    store.commit('SET_USER_SCALE', res.result.scale); 
+                    store.commit('SET_CLUB_NAME', res.result.name);  
+                    store.commit('SET_USER_INFO', res.result.name);  
+                    localStorage.setItem('clubId',res.result.clubId);
+                    localStorage.setItem('scale',res.result.scale);
+                    localStorage.setItem('clubName', res.result.name);
+                    localStorage.setItem('nickname', res.result.name);
+                    localStorage.setItem('avatar', res.result.avatar);
                 }
                 router.push("/");
             }

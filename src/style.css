@@ -1,5 +1,5 @@
 body {
-  background-color: #f2f2f2;
+  background-color: var(--background-color);
   margin:0;
   font-family: 'Microsoft YaHei';
   min-width: 600px;
@@ -13,6 +13,7 @@ body {
 :root {
   --el-color-primary: #00a1e9;
   --el-border-width:0.05vw;
+  --background-color:#f2f2f2
 }
 .el-input__wrapper{
   border: 0.05vw solid #D4D4D4 !important;
@@ -52,5 +53,5 @@ body {
   border-top: 0.05vw var(--el-border-color) var(--el-border-style);
 }
 .el-dialog{
-  width:450px !important;
+  width:450px;
 }

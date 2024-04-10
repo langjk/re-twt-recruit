@@ -11,6 +11,8 @@ import { useStore } from 'vuex';
 const store = useStore(); 
 const router = useRouter();
 const route = useRoute();
+
+
 type gloVar = {
     TWT:string,
     lightTWT:string
@@ -26,24 +28,28 @@ watch(() => globalVars.TWT, (newValue) => {
 watch(() => globalVars.lightTWT, (newValue) => {
     lightTWT.value =newValue
 })
-var  userName = localStorage.getItem('nickname')
-store.commit('SET_USER_INFO', userName);   
-const userInfo = computed(() => store.state.name);  
+
+
+var userName = localStorage.getItem('nickname')
+
+if(userName)
+    store.commit('SET_USER_INFO', userName);   
+
+var userInfo = computed(() => store.state.name); 
+
 const resetLogin = () => {
+    localStorage.clear();
     store.commit('SET_USER_INFO', '');
-    router.push('/Login')
+    store.commit('SET_USER_SCALE', 0);
+    store.commit('SET_CLUB_NAME', '');
+    store.commit('SET_USER_TYPE', 0);
+    router.push('/Login');
 }
 
-const checkLogin = () => {
-    if(!userInfo){
-        localStorage.removeItem('token');
-        localStorage.removeItem('nickname');
-        router.push('/Login');
-    }
-    else{
-        router.push('/myApplication')
-    }
-}
+var accountType = Number(localStorage.getItem('accountType'))
+if(accountType)
+    store.commit('SET_USER_TYPE', accountType); 
+var Type = computed(() => store.state.accountType);
 </script>
 
 <template>
@@ -59,7 +65,8 @@ const checkLogin = () => {
             <span class="title black">招募中心</span>
         </el-row>
         <el-menu-item class="items" index="/">首页推荐</el-menu-item>
-        <el-menu-item class="items" index="/myapplication">我的申请</el-menu-item>
+        <el-menu-item v-if="Type == 1" class="items" index="/myapplication">我的申请</el-menu-item>
+        <el-menu-item v-if="Type != 1" class="items" index="/myapplication">社团信息</el-menu-item>
         <el-menu-item class="items" index="/applymanage">招募管理</el-menu-item>
         <el-menu-item class="items" index="/morehelp">更多帮助</el-menu-item>
         <el-sub-menu class="rightBar" index="">
@@ -69,7 +76,7 @@ const checkLogin = () => {
                     {{userInfo}}
                 </el-row>
             </template>
-            <el-menu-item @click="checkLogin()">个人信息</el-menu-item>
+            <!-- <el-menu-item @click="checkLogin()">个人信息</el-menu-item> -->
             <el-menu-item index="/Login" @click="resetLogin()">退出登录</el-menu-item>
         </el-sub-menu>
     </el-menu>
@@ -117,6 +124,6 @@ const checkLogin = () => {
 :deep(.el-menu-item.is-active){
     background-color:v-bind(lightTWT) !important;
     color:v-bind(TWT) !important;
-    border-bottom:1px solid v-bind(TWT) !important;
+    border-bottom:3px solid v-bind(TWT) !important;
 }
 </style>

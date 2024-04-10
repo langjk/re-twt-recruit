@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject,ref } from 'vue';
+import { inject, ref, onMounted } from 'vue';
 import projectSideBar from '@/components/applyManage/projectManage/projectSideBar.vue';
 import { MdEditor } from 'md-editor-v3';
 import { ElMessage } from 'element-plus';
@@ -26,8 +26,12 @@ const backColor = ref('#00a1e9')
 const pageMethod = ref('25%')
 const circleMethod = ref('repeat')
 const lockMethod = ref('fixed')
+const backCache = ref('')
+const coverCache = ref('')
 var baseurl = import.meta.env.VITE_API_URL
-http.get("/v1/user/project", {projectId:projectId
+
+const fetchData = () => {
+    http.get("/v1/user/project", {projectId:projectId
         }).then((res:{code:number,result:any})=>{
             if(res.code == 200){
                 title.value = res.result.title
@@ -35,8 +39,10 @@ http.get("/v1/user/project", {projectId:projectId
                 endTime.value = res.result.endTime
                 contact.value = res.result.contact
                 brief.value = res.result.brief
-                coverUrl.value = res.result.cover
-                backUrl.value = res.result.background
+                coverUrl.value = baseurl + res.result.cover
+                coverCache.value = res.result.cover
+                backUrl.value = baseurl + res.result.background
+                backCache.value = res.result.background
                 titleColor.value = res.result.titleColor
                 backColor.value = res.result.backColor
                 pageMethod.value = res.result.pageMethod
@@ -44,6 +50,13 @@ http.get("/v1/user/project", {projectId:projectId
                 lockMethod.value = res.result.slideLock
             }
         });
+}
+onMounted(async () => {  
+    try {  
+        fetchData();} catch (error) {  
+    console.error('Error fetching', error);  
+    }  
+}); 
 const disabledDate = (time: Date) => {
     return time.getTime() < Date.now()
 }
@@ -61,10 +74,37 @@ const beforeUpload = (file:any) => {
 const handleCoverUpload = (response: any) => 
 {
     coverUrl.value = import.meta.env.VITE_API_URL + response.result
+    coverCache.value = response.result
 }
 const handleBackUpload = (response: any) => 
 {
-    backUrl.value = import.meta.env.VITE_API_URL + response.results
+    backUrl.value = import.meta.env.VITE_API_URL + response.result
+    backCache.value = response.result
+}
+const changeProject = () => {
+    let endTimeString = JSON.stringify(endTime.value).slice(1,11)
+    http.post("/v1/child/project/update",
+        {
+            projectId:projectId,
+            title:title.value,
+            covers:coverCache.value,
+            backgrounds:backCache.value,
+            brief:brief.value,
+            contact:contact.value,
+            titleColor:titleColor.value,
+            backColor:backColor.value,
+            pageMethod:pageMethod.value,
+            circleMethod:circleMethod.value,
+            slideLock:lockMethod.value,
+            endTime:endTimeString,
+        })
+        .then((res:{code:number,result:any})=>{
+            if(res.code == 200){
+                ElMessage.success('修改项目成功！');
+                fetchData();
+            }
+        });
+
 }
 </script>
 
@@ -84,7 +124,7 @@ const handleBackUpload = (response: any) =>
                         <el-form-item label="标题">
                             <el-input class="blockInput" v-model="title" placeholder="请输入招募标题"/>
                         </el-form-item>
-                        <el-form-item label="筛选方式">
+                        <!-- <el-form-item label="筛选方式">
                             <div class="filterMethod">
                                 <el-radio-group v-model="filterMethod">
                                     <el-radio label="0" size="default">按照第一志愿筛选</el-radio>
@@ -108,7 +148,7 @@ const handleBackUpload = (response: any) =>
                                     <div>组别和筛选方式在项目公开后不可更改</div>
                                 </el-row>
                             </div>
-                        </el-form-item>
+                        </el-form-item> -->
                         <el-form-item label="招募截止时间">
                             <div class="datePicker">
                                 <el-date-picker
@@ -276,6 +316,9 @@ const handleBackUpload = (response: any) =>
                     </el-space>
                 </el-form>
             </div>
+            <el-row style="justify-content:center">
+                <el-button class="PreAndSaveButton" type="primary" @click="changeProject()">修改项目</el-button>
+            </el-row>
         </el-main>
     </el-container>
 </template>
@@ -458,5 +501,9 @@ const handleBackUpload = (response: any) =>
     padding:30px 20px;
     line-height:40px;
     margin: 0 auto;
+}
+.PreAndSaveButton{
+    width:264px;
+    margin-bottom:100px;
 }
 </style>

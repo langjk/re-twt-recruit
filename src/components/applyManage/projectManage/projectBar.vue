@@ -4,8 +4,24 @@ export default {
 }
 </script>
 <script setup lang="ts" name="projectBar">
+import { inject, ref, watch } from 'vue';
 import type { Bar } from '@/views/applyManage/projectManage/projectBarType';
 import { useRouter } from 'vue-router';
+type gloVar = {
+    TWT:string,
+    lightTWT:string
+}
+const globalVars:gloVar = inject<gloVar>('globalVars')!;
+const TWT=ref('')
+const lightTWT=ref('')
+TWT.value = globalVars.TWT;
+lightTWT.value =globalVars.lightTWT;
+watch(() => globalVars.TWT, (newValue) => {
+    TWT.value = newValue
+})
+watch(() => globalVars.lightTWT, (newValue) => {
+    lightTWT.value =newValue
+})
 const router = useRouter()
 const props = defineProps<{
     data:Bar
