@@ -192,6 +192,7 @@ const checkData = () => {
   });
   if (!allSelected) {
     ElMessage.warning("请选择问题对应组别！");
+    return false;
   }
   return true;
 };

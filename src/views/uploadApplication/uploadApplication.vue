@@ -24,6 +24,10 @@ const pageMethod = ref("25%");
 const circleMethod = ref("repeat");
 const lockMethod = ref("fixed");
 const groups = ref<any[]>([]);
+// const selectDate = ref("");
+var startTime = new Date();
+var tmpDate = new Date();
+const dateString = ref("");
 const timeQuest = ref({ title: "", time: [] });
 const baseurl = import.meta.env.VITE_API_URL;
 // 设置所有折叠面展开
@@ -33,6 +37,8 @@ var projectId = route.params.projectId;
 type Answer = {
   questionId: number;
   questionAnswer: any;
+  required: boolean;
+  minSelect: number;
 };
 type uploadAnswer = {
   groupId: number;
@@ -40,6 +46,13 @@ type uploadAnswer = {
 };
 const answers = ref<uploadAnswer[]>([]);
 const questions: any = ref([]);
+const formatDate = (date: any) => {
+  const year = date.getFullYear();
+  const month = ("0" + (date.getMonth() + 1)).slice(-2);
+  const day = ("0" + date.getDate()).slice(-2);
+  return `${year}-${month}-${day}`;
+};
+
 const fetchDetail = async () => {
   await http
     .get("/v1/user/project", { projectId: projectId })
@@ -58,6 +71,9 @@ const fetchDetail = async () => {
         lockMethod.value = res.result.slideLock;
         groups.value = res.result.groups;
         timeQuest.value = JSON.parse(res.result.rules);
+        startTime = new Date(res.result.startTime);
+        tmpDate = new Date(startTime);
+        dateString.value = formatDate(startTime);
       }
     });
   for (let i = 0; i < groups.value.length; i++) {
@@ -71,11 +87,18 @@ const fetchDetail = async () => {
         uploadAnswer.quest.push({
           questionId: groups.value[i].questions[j].questionId,
           questionAnswer: [],
+          required: JSON.parse(groups.value[i].questions[j].questionContent)
+            .required,
+          minSelect: JSON.parse(groups.value[i].questions[j].questionContent)
+            .optionDetail.minSelect,
         });
       else
         uploadAnswer.quest.push({
           questionId: groups.value[i].questions[j].questionId,
           questionAnswer: "",
+          required: JSON.parse(groups.value[i].questions[j].questionContent)
+            .required,
+          minSelect: 0,
         });
       var handleQuest: any = groups.value[i].questions[j];
       handleQuest.questionContent = JSON.parse(handleQuest.questionContent);
@@ -101,11 +124,12 @@ const timeSelect = ref([]);
 const checkData = () => {
   //开始恐怖的整理项目格式和检查遗漏
   //检查空组
-  if (userContact.value.telephone == "") {
+
+  if (!userContact.value.telephone) {
     ElMessage.warning("电话为空！");
     return false;
   }
-  if (userContact.value.email == "") {
+  if (!userContact.value.email) {
     ElMessage.warning("邮箱为空！");
     return false;
   }
@@ -117,17 +141,58 @@ const checkData = () => {
     ElMessage.warning("请选择面试时间！");
     return false;
   }
+
+  //检查答题
+  for (let i = 0; i < answers.value.length; i++) {
+    for (let j = 0; j < groupSelect.value.length; j++) {
+      if (answers.value[i].groupId.toString() == groupSelect.value[j])
+        for (let k = 0; k < answers.value[i].quest.length; k++) {
+          if (answers.value[i].quest[k].required) {
+            //必答题都检查
+
+            if (answers.value[i].quest[k].questionAnswer instanceof Array) {
+              //多选/单选题
+              if (
+                answers.value[i].quest[k].questionAnswer.length <
+                answers.value[i].quest[k].minSelect
+              ) {
+                ElMessage.warning("请检查选择题答题情况！");
+                return false;
+              }
+            } else if (!answers.value[i].quest[k].questionAnswer) {
+              //简述题
+              ElMessage.warning("请检查简述题答题情况！");
+              return false;
+            }
+          } else {
+            //非必答题仅检查单选多选是否合规
+            if (answers.value[i].quest[k].questionAnswer instanceof Array) {
+              //多选/单选题
+              if (
+                answers.value[i].quest[k].questionAnswer.length &&
+                answers.value[i].quest[k].questionAnswer.length <
+                  answers.value[i].quest[k].minSelect
+              ) {
+                ElMessage.warning("请检查选择题答题情况！");
+                return false;
+              }
+            }
+          }
+        }
+    }
+  }
+
   return true;
 };
 const uploadApplication = () => {
-  console.log(answers.value);
   if (!checkData()) {
     return;
   }
   let timeString = "";
   let groupString = "";
   for (let i = 0; i < timeSelect.value.length; i++) {
-    timeString = timeString + timeSelect.value[i] + ",";
+    timeString =
+      timeString + formatDate(startTime) + " " + timeSelect.value[i] + ",";
   }
   timeString = timeString.slice(0, timeString.length - 1);
   groupString = JSON.stringify(groupSelect.value);
@@ -141,7 +206,7 @@ const uploadApplication = () => {
       applicationCampus: userContact.value.campus,
       wantedGroupIds: groupString,
       answers: JSON.stringify(answers.value),
-      times: timeString,
+      dateTimes: timeString,
     })
     .then((res: { code: any; message: any; result: any }) => {
       if (res.code == 200) {
@@ -247,6 +312,19 @@ const campusOption = ["卫津路校区", "北洋园校区"];
       </div>
       <div class="inforContainer">
         <div class="questTitle">2.{{ timeQuest.title }}</div>
+        <!-- <div class="datePicker">
+          <el-date-picker
+            v-model="selectDate"
+            type="date"
+            placeholder="选择日期"
+            value-format="YYYY-MM-DD"
+            @change="console.log(selectDate)"
+          />
+        </div> -->
+        <!-- <el-row class="warning">
+          <el-icon class="icon"><Warning /></el-icon>
+          <div>面试从 {{ dateString }} 开始，为期三天</div>
+        </el-row> -->
         <el-tabs type="border-card" class="time-tabs">
           <el-tab-pane
             v-if="
@@ -256,7 +334,7 @@ const campusOption = ["卫津路校区", "北洋园校区"];
               timeQuest.time[3] +
               timeQuest.time[4]
             "
-            label="上午"
+            :label="`${formatDate(tmpDate)} 上午`"
           >
             <slot>
               <el-checkbox-group v-model="timeSelect">
@@ -281,7 +359,7 @@ const campusOption = ["卫津路校区", "北洋园校区"];
               timeQuest.time[8] +
               timeQuest.time[9]
             "
-            label="下午"
+            :label="`${formatDate(tmpDate)} 中午`"
           >
             <slot>
               <el-checkbox-group v-model="timeSelect">
@@ -306,7 +384,7 @@ const campusOption = ["卫津路校区", "北洋园校区"];
               timeQuest.time[13] +
               timeQuest.time[14]
             "
-            label="晚上"
+            :label="`${formatDate(tmpDate)} 晚上`"
           >
             <slot>
               <el-checkbox-group v-model="timeSelect">
@@ -339,7 +417,11 @@ const campusOption = ["卫津路校区", "北洋园校区"];
                   :key="index"
                 >
                   <div class="questionTitle">
-                    {{ item.questionContent.title }}
+                    {{
+                      item.questionContent.required
+                        ? "【必填】"
+                        : "【非必填】" + item.questionContent.title
+                    }}
                   </div>
                   <div v-if="item.questionContent.type == 't'">
                     <el-input
@@ -452,10 +534,27 @@ const campusOption = ["卫津路校区", "北洋园校区"];
   margin-bottom: 15px;
   align-items: center;
 }
+.datePicker {
+  margin: 10px;
+  margin-top: 20px;
+}
 .questTitle {
   height: 17px;
   font-size: 16px;
   color: v-bind(TWT);
+}
+.warning {
+  display: flex;
+  color: #eaabaa;
+  width: 330px;
+  flex-wrap: nowrap;
+  font-size: 14px;
+  line-height: 16px;
+  margin-top: 15px;
+  margin-left: 10px;
+}
+.warning .icon {
+  margin-top: 2px;
 }
 .groupButtonContainer {
   margin-left: 10px;
