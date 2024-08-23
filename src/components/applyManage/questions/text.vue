@@ -63,7 +63,7 @@ const deleteQuestion = () => {
           class="textInput"
           v-model="model.title"
         />
-        <el-checkbox v-model="model.required" value="必填" />
+        <el-checkbox v-model="model.required" value="必填" label="必填" />
         <div class="deleteButton">
           <el-button circle plain type="danger" @click="deleteQuestion">
             <el-icon><Delete /></el-icon>

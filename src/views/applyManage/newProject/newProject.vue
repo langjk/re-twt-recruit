@@ -129,7 +129,7 @@ const addNewQuestion = () => {
             { label: "选项1", id: 0 },
             { label: "选项2", id: 1 },
           ],
-          maxSelect: 2,
+          maxSelect: 1,
           minSelect: 1,
           optionsIdCount: 2,
         },

@@ -438,7 +438,6 @@ const campusOption = ["卫津路校区", "北洋园校区"];
                         v-model="
                           answers[groupindex].quest[index].questionAnswer
                         "
-                        :min="item.questionContent.optionDetail.minSelect"
                         :max="item.questionContent.optionDetail.maxSelect"
                       >
                         <el-checkbox
