@@ -23,11 +23,12 @@ type uploadAnswer = {
 const answers = ref<uploadAnswer[]>([]);
 const questions: any = ref([]);
 const fetchGroup = () => {
+  console.log(data);
   for (let i = 0; i < data.groups.length; i++) {
     let uploadAnswer: uploadAnswer = { groupId: 0, quest: [] };
     questions.value.push([]);
     for (let j = 0; j < data.Questions.length; j++) {
-      if (data.Questions[j].groups.includes(i)) {
+      if (data.Questions[j].groups.includes(data.groups[i].label)) {
         if (data.Questions[j].type == "s")
           uploadAnswer.quest.push({ questionId: 0, questionAnswer: [] });
         else uploadAnswer.quest.push({ questionId: 0, questionAnswer: "" });

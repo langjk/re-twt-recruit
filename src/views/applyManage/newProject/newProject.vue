@@ -129,7 +129,7 @@ const addNewQuestion = () => {
             { label: "选项1", id: 0 },
             { label: "选项2", id: 1 },
           ],
-          maxSelect: 1,
+          maxSelect: 2,
           minSelect: 1,
           optionsIdCount: 2,
         },
@@ -206,24 +206,24 @@ const saveProject = async () => {
     groupString = groupString + groups.value[i].label + ",";
   }
   groupString = groupString.slice(0, groupString.length - 1);
-  await http
-    .post("/v1/child/groups", {
-      groups: groupString,
-      clubId: 3,
-    })
-    .then((res: { code: number; result: any }) => {
-      if (res.code == 200) {
-        for (let j = 0; j < questString.length; j++) {
-          for (let k = 0; k < questString[j].groups.length; k++)
-            questString[j].groups[k] =
-              res.result[questString[j].groups[k]].groupId;
-        }
-        groupString = "";
-        for (let l = 0; l < res.result.length; l++)
-          groupString = groupString + res.result[l].groupId + ",";
-        groupString = groupString.slice(0, groupString.length - 1);
-      }
-    });
+  // await http 弃用，直接给后端传组别名称，不用获取id
+  //   .post("/v1/child/groups", {
+  //     groups: groupString,
+  //     clubId: 3,
+  //   })
+  //   .then((res: { code: number; result: any }) => {
+  //     if (res.code == 200) {
+  //       for (let j = 0; j < questString.length; j++) {
+  //         for (let k = 0; k < questString[j].groups.length; k++)
+  //           questString[j].groups[k] =
+  //             res.result[questString[j].groups[k]].groupId;
+  //       }
+  //       groupString = "";
+  //       for (let l = 0; l < res.result.length; l++)
+  //         groupString = groupString + res.result[l].groupId + ",";
+  //       groupString = groupString.slice(0, groupString.length - 1);
+  //     }
+  //   });
 
   let endTimeString = JSON.stringify(endTime.value).slice(1, 11);
   let ruleString = JSON.stringify(timeQuest.value);

@@ -4,7 +4,7 @@ export default {
 };
 </script>
 <script setup lang="ts" name="timeGroup">
-import { inject, ref } from "vue";
+import { inject, ref, watch } from "vue";
 import { timeQ } from "@/views/applyManage/newProject/newProjectType";
 type gloVar = {
   TWT: string;
@@ -29,6 +29,14 @@ const timescounter = ref([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 const model = defineModel<timeQ>({
   default: { title: "您倾向于什么时间参加面试", time: [] },
 });
+
+watch(
+  () => model.value,
+  (val) => {
+    //val为修改后的值,preVal为修改前的值
+    timescounter.value = val.time;
+  }
+);
 const TimeFlag = (Data: number) => {
   //大一怎么写出这两百行的b函数的
   if (timescounter.value[Data] == 0) {

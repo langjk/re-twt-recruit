@@ -90,7 +90,7 @@ const deleteQuestion = () => {
           v-for="item in groupsRef"
           :key="item.id"
           :label="item.label"
-          :value="item.id"
+          :value="item.label"
         />
       </el-select>
       <el-button class="questionSort" type="primary" plain icon="Sort" />

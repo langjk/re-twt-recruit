@@ -1,21 +1,12 @@
 <script setup lang="ts">
 import { inject, ref, onMounted } from "vue";
 import projectSideBar from "@/components/applyManage/projectManage/projectSideBar.vue";
-
-import timeGroup from "@/components/applyManage/questions/time.vue";
-import textQuest from "@/components/applyManage/questions/text.vue";
-import selectQuest from "@/components/applyManage/questions/select.vue";
-import describeQuest from "@/components/applyManage/questions/describe.vue";
 import { MdEditor } from "md-editor-v3";
+import { ElMessage } from "element-plus";
 import "md-editor-v3/lib/style.css";
 import { useRoute } from "vue-router";
-import { ElMessage } from "element-plus";
-import { VueDraggableNext } from "vue-draggable-next";
-import * as Types from "../../newProject/newProjectType";
-import { useRouter } from "vue-router";
 import http from "@/utils/http";
 const route = useRoute();
-const router = useRouter();
 type gloVar = {
   TWT: string;
   lightTWT: string;
@@ -28,27 +19,17 @@ const filterMethod = ref("0");
 const endTime = ref("");
 const contact = ref("");
 const brief = ref("");
-const coverUrl = ref(" ");
-const backUrl = ref(" ");
+const coverUrl = ref("");
+const backUrl = ref("");
 const titleColor = ref("#FFFFFF");
 const backColor = ref("#00a1e9");
 const pageMethod = ref("25%");
 const circleMethod = ref("repeat");
 const lockMethod = ref("fixed");
-const addDialogVisible = ref(false);
-const newQuestionType = ref("t");
-const Questions = ref<any[]>([]);
-const groups = ref<any>([]);
-const groupsIdCount = ref(0);
-
-const timeQuest = ref<Types.timeQ>({
-  title: "",
-  time: [],
-});
-
 const backCache = ref("");
 const coverCache = ref("");
 var baseurl = import.meta.env.VITE_API_URL;
+
 const fetchData = () => {
   http
     .get("/v1/user/project", { projectId: projectId })
@@ -68,15 +49,6 @@ const fetchData = () => {
         pageMethod.value = res.result.pageMethod;
         circleMethod.value = res.result.circleMethod;
         lockMethod.value = res.result.slideLock;
-        timeQuest.value = JSON.parse(res.result.rules);
-        for (let i = 0; i < res.result.groups.length; i++) {
-          addGroup(res.result.groups[i].groupName);
-        }
-
-        for (let i = 0; i < res.result.questions.length; i++) {
-          let ques = JSON.parse(res.result.questions[i]);
-          addNewQuestion(ques);
-        }
       }
     });
 };
@@ -87,7 +59,9 @@ onMounted(async () => {
     console.error("Error fetching", error);
   }
 });
-
+const disabledDate = (time: Date) => {
+  return time.getTime() < Date.now();
+};
 const beforeUpload = (file: any) => {
   const isJPG = file.type === "image/jpeg" || file.type === "image/png";
   const isLt2M = file.size / 1024 / 1024 < 10;
@@ -107,222 +81,29 @@ const handleBackUpload = (response: any) => {
   backUrl.value = import.meta.env.VITE_API_URL + response.result;
   backCache.value = response.result;
 };
-const addGroup = (lab?: string) => {
-  let newGroup = { label: lab ? lab : "", id: groupsIdCount.value };
-  groups.value.push(newGroup);
-  groupsIdCount.value++;
-};
-
-const questionRefs = ref<Types.QuestionInstance[]>([]);
-
-const deleteGroup = (index: number) => {
-  if (groups.value.length == 1) {
-    ElMessage.warning("必须保留一个组别！");
-    return;
-  } else {
-    groups.value.splice(index - 1, 1);
-    questionRefs.value.forEach((ref) => {
-      if (ref) {
-        ref.clearSelect();
-      }
-    });
-  }
-};
-const addNewQuestion = (ques?: any) => {
-  if (ques) {
-    Questions.value.push(ques);
-    return;
-  }
-  switch (newQuestionType.value) {
-    case "d":
-      let d: Types.describeQ = {
-        type: "d",
-        title: "",
-        required: false,
-        groups: [],
-      };
-      Questions.value.push(d);
-      addDialogVisible.value = false;
-      return;
-    case "t":
-      let t: Types.textQ = {
-        type: "t",
-        title: "",
-        required: false,
-        groups: [],
-      };
-      Questions.value.push(t);
-      addDialogVisible.value = false;
-      return;
-    case "s":
-      let s: Types.selectQ = {
-        type: "s",
-        title: "",
-        optionDetail: {
-          options: [
-            { label: "选项1", id: 0 },
-            { label: "选项2", id: 1 },
-          ],
-          maxSelect: 2,
-          minSelect: 1,
-          optionsIdCount: 2,
-        },
-        required: false,
-        groups: [],
-      };
-      Questions.value.push(s);
-      addDialogVisible.value = false;
-      return;
-  }
-};
-const handleDelete = (serial: number) => {
-  Questions.value.splice(serial, 1);
-};
-const disabledDate = (time: Date) => {
-  return time.getTime() < Date.now();
-};
-const checkData = () => {
-  //开始恐怖的整理项目格式和检查遗漏
-  //检查空组
-  if (title.value == "") {
-    ElMessage.warning("项目标题为空！");
-    return false;
-  }
-  groups.value.forEach((group: any, index: any) => {
-    if (group.label == "") {
-      ElMessage.warning("第" + (index + 1) + "个组别名称为空！");
-      return false;
-    }
-  });
-
-  const uniqueSampleTypeIds = new Set(
-    groups.value.map((item: any) => item.label)
-  );
-  if (groups.value.length !== uniqueSampleTypeIds.size) {
-    ElMessage.warning("组别名称不允许重复！");
-    return false;
-  }
-
-  if (endTime.value == "") {
-    ElMessage.warning("截止日期为空！");
-    return false;
-  }
-  if (contact.value == "") {
-    ElMessage.warning("联系方式为空！");
-    return false;
-  }
-  if (brief.value == "") {
-    ElMessage.warning("简介为空！");
-    return false;
-  }
-  if (backColor.value == "") backColor.value = "#00a1e9";
-  if (titleColor.value == "") titleColor.value = "#FFFFFF";
-  let timeCheckFlag = true;
-  for (let i = 0; i < timeQuest.value.time.length; i++) {
-    if (timeQuest.value.time[i] == 1) timeCheckFlag = false;
-  }
-  if (timeCheckFlag) {
-    ElMessage.warning("请选择面试时间！");
-    return false;
-  }
-
-  let allSelected = true;
-  Questions.value.forEach((e) => {
-    if (!e.groups.length) {
-      allSelected = false;
-    }
-  });
-  if (!allSelected) {
-    ElMessage.warning("请选择问题对应组别！");
-    return false;
-  }
-  return true;
-};
-const saveProject = async () => {
-  if (!checkData()) {
-    return;
-  }
-  let groupString = "";
-  let questString = JSON.parse(JSON.stringify(Questions.value));
-  for (let i = 0; i < groups.value.length; i++) {
-    groupString = groupString + groups.value[i].label + ",";
-  }
-  groupString = groupString.slice(0, groupString.length - 1);
-  // await http
-  //   .post("/v1/child/groups", {
-  //     groups: groupString,
-  //     clubId: 3,
-  //   })
-  //   .then((res: { code: number; result: any }) => {
-  //     if (res.code == 200) {
-  //       for (let j = 0; j < questString.length; j++) {
-  //         for (let k = 0; k < questString[j].groups.length; k++) {
-  //           for (let l = 0; l < res.result.length; l++) {
-  //             if (questString[j].groups[k] == res.result[l].groupName)
-  //               questString[j].groups[k] = res.result[l].groupId;
-  //           }
-  //         }
-  //       }
-  //       groupString = "";
-  //       for (let l = 0; l < res.result.length; l++)
-  //         groupString = groupString + res.result[l].groupId + ",";
-  //       groupString = groupString.slice(0, groupString.length - 1);
-  //     }
-  //   });
-
+const changeProject = () => {
   let endTimeString = JSON.stringify(endTime.value).slice(1, 11);
-  let ruleString = JSON.stringify(timeQuest.value);
-  let scale = localStorage.getItem("scale");
-  let clubId = localStorage.getItem("clubId");
   http
-    .post("/v1/child/project/update/all", {
+    .post("/v1/child/project/update", {
       projectId: projectId,
       title: title.value,
-      clubId: clubId,
-      groups: groupString,
       covers: coverCache.value,
       backgrounds: backCache.value,
-      scale: scale,
-      questions: JSON.stringify(questString),
       brief: brief.value,
       contact: contact.value,
-      filterMethod: filterMethod.value,
       titleColor: titleColor.value,
       backColor: backColor.value,
       pageMethod: pageMethod.value,
       circleMethod: circleMethod.value,
       slideLock: lockMethod.value,
       endTime: endTimeString,
-      rules: ruleString,
     })
-    .then((res: { code: number; message: any; result: any }) => {
+    .then((res: { code: number; result: any }) => {
       if (res.code == 200) {
         ElMessage.success("修改项目成功！");
-        router.push("/applymanage/projectmanage");
-      } else {
-        ElMessage.warning(res.message);
+        fetchData();
       }
     });
-};
-
-const gotoPreview = () => {
-  const data = {
-    title: title.value,
-    brief: brief.value,
-    groups: groups.value,
-    timeQuestTitle: timeQuest.value.title,
-    timeQuestTime: timeQuest.value.time,
-    titleColor: titleColor.value,
-    backColor: backColor.value,
-    Questions: Questions.value,
-  };
-  const url = router.resolve({
-    name: "projectPreview",
-    params: {
-      data: JSON.stringify(data),
-    },
-  }).href;
-  window.open(url, "_blank");
 };
 </script>
 
@@ -345,56 +126,6 @@ const gotoPreview = () => {
                 v-model="title"
                 placeholder="请输入招募标题"
               />
-            </el-form-item>
-            <el-form-item label="组别">
-              <div class="groupForm">
-                <VueDraggableNext
-                  :list="groups"
-                  group="name"
-                  animation="500"
-                  handle=".groupOptionButtonSort"
-                >
-                  <transition-group>
-                    <el-row
-                      class="groupOption"
-                      v-for="i in groups.length"
-                      :key="i"
-                    >
-                      <el-col :span="19">
-                        <el-input
-                          :placeholder="'组别' + i"
-                          v-model="groups[i - 1].label"
-                        />
-                      </el-col>
-                      <el-col :span="5" class="buttonGroup">
-                        <el-button
-                          class="groupOptionButton"
-                          type="danger"
-                          plain
-                          icon="Delete"
-                          @click="deleteGroup(i)"
-                        />
-                        <el-button
-                          class="groupOptionButtonSort"
-                          type="primary"
-                          plain
-                          icon="Sort"
-                        />
-                      </el-col>
-                    </el-row>
-                  </transition-group>
-                </VueDraggableNext>
-                <el-button class="addButton" @click="addGroup()">
-                  新增组别
-                </el-button>
-                <el-row class="warning">
-                  <el-icon class="icon"><Warning /></el-icon>
-                  <div>
-                    如您删除了一个组别，需要重新设置申请表单中问题组别
-                    如项目只有一个组别，在表单中将不显示组别选项，直接选中组别
-                  </div>
-                </el-row>
-              </div>
             </el-form-item>
             <!-- <el-form-item label="筛选方式">
                             <div class="filterMethod">
@@ -609,98 +340,12 @@ const gotoPreview = () => {
           </el-space>
         </el-form>
       </div>
-      <div class="blockContainer">
-        <el-row class="blockTitle">
-          <span></span>
-          申请表单
-        </el-row>
-        <el-form label-position="left" class="blockForm">
-          <el-space direction="vertical" alignment="left" class="space">
-            <timeGroup :timeV="timeQuest.time" v-model="timeQuest"></timeGroup>
-            <VueDraggableNext
-              :list="Questions"
-              group="name"
-              animation="500"
-              handle=".questionSort"
-            >
-              <transition-group>
-                <div v-for="(item, index) in Questions" :key="index">
-                  <textQuest
-                    v-if="item.type == 't'"
-                    :serial="index + 2"
-                    :groups="groups"
-                    v-model="Questions[index]"
-                    ref="questionRefs"
-                    @deleteQ="handleDelete"
-                  />
-                  <selectQuest
-                    v-if="item.type == 's'"
-                    :serial="index + 2"
-                    :groups="groups"
-                    v-model="Questions[index]"
-                    ref="questionRefs"
-                    @deleteQ="handleDelete"
-                  />
-                  <describeQuest
-                    v-if="item.type == 'd'"
-                    :serial="index + 2"
-                    :groups="groups"
-                    v-model="Questions[index]"
-                    ref="questionRefs"
-                    @deleteQ="handleDelete"
-                  />
-                </div>
-              </transition-group>
-            </VueDraggableNext>
-          </el-space>
-          <el-button class="newQuestionButton" @click="addDialogVisible = true"
-            >新增问题</el-button
-          >
-          <el-dialog
-            v-model="addDialogVisible"
-            title="请选择新增问题类型"
-            width="450"
-          >
-            <div style="display: flex; justify-content: center">
-              <el-radio-group v-model="newQuestionType" size="large">
-                <el-radio-button value="t">多行文本题</el-radio-button>
-                <el-radio-button value="d">文本描述</el-radio-button>
-                <el-radio-button value="s">单选多选题</el-radio-button>
-              </el-radio-group>
-            </div>
-            <div class="newQuestionHint">
-              <div v-if="newQuestionType == 't'">
-                申请人使用简答方式回答问题
-              </div>
-              <div v-if="newQuestionType == 's'">
-                申请人使用选择方式回答问题
-              </div>
-              <div v-if="newQuestionType == 'd'">在问题之间插入的文本描述</div>
-            </div>
-            <template #footer>
-              <div class="dialog-footer">
-                <el-button @click="addDialogVisible = false">取消</el-button>
-                <el-button type="primary" @click="addNewQuestion()">
-                  添加
-                </el-button>
-              </div>
-            </template>
-          </el-dialog>
-        </el-form>
-      </div>
-
-      <el-row style="justify-content: space-evenly">
+      <el-row style="justify-content: center">
         <el-button
           class="PreAndSaveButton"
           type="primary"
-          @click="gotoPreview()"
-          >表单预览</el-button
-        >
-        <el-button
-          class="PreAndSaveButton"
-          type="primary"
-          @click="saveProject()"
-          >保存</el-button
+          @click="changeProject()"
+          >修改项目</el-button
         >
       </el-row>
     </el-main>
@@ -708,8 +353,12 @@ const gotoPreview = () => {
 </template>
 
 <style scoped>
+.blockForm {
+  margin-left: 31px;
+}
 .blockContainer {
   width: 950px;
+  overflow: hidden;
   padding: 25px;
   background: #ffffff;
   box-shadow: 0px 1px 4px 0px rgba(92, 92, 92, 0.12);
@@ -730,67 +379,43 @@ const gotoPreview = () => {
   background: v-bind(TWT);
 }
 .space {
-  gap: 10px 0px !important;
+  gap: 3px 0px !important;
+}
+.blockTitle {
+  height: 20px;
+  font-size: 18px;
+  line-height: 20px;
+  font-weight: 400;
+  color: #444444;
+  margin-bottom: 20px;
+}
+.blockTitle span {
+  width: 6px;
+  margin-right: 18px;
+  background: v-bind(TWT);
+}
+.blockForm {
+  margin-left: 47px;
 }
 .blockInput {
   width: 330px;
   margin-left: 70px;
 }
-.blockForm {
-  margin-left: 47px;
-}
-.groupTitle {
-  width: 530px;
-  background: #f6f6f6;
-  border-radius: 2px;
-  flex-wrap: nowrap;
-  color: #727272;
-  font-size: 14px;
-  text-align: center;
-}
-.groupTitle #space {
-  margin-right: 25px;
-}
-.groupForm {
-  padding-left: 70px;
-}
-.groupOption {
-  margin-bottom: 20px;
-  width: 330px;
-}
-.buttonGroup {
-  display: flex;
-  justify-content: space-evenly;
-  flex-direction: row-reverse;
-  align-items: center;
-  width: 100%;
-}
-.groupOptionButton {
-  width: 23px;
-  height: 23px;
-  margin: 0;
-  margin-left: 7px;
-  padding: 0;
-  font-size: 13px;
-  border: 0.05vw solid #b2b2b2;
-}
-.groupOptionButtonSort {
-  width: 23px;
-  height: 23px;
-  margin: 0;
-  margin-left: 7px;
-  padding: 0;
-  font-size: 13px;
-  border: 0.05vw solid #b2b2b2;
-}
 .filterMethod {
   margin-left: 38px;
   font-size: 18px;
 }
-.addButton {
-  background-color: v-bind(TWT);
-  color: white;
-  width: 330px;
+.questButton {
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+  font-size: 13px;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  border: 0.05vw solid v-bind(TWT);
+  color: v-bind(TWT);
+  border-radius: 20px;
 }
 .warning {
   display: flex;
@@ -905,39 +530,6 @@ const gotoPreview = () => {
   padding: 30px 20px;
   line-height: 40px;
   margin: 0 auto;
-}
-.newQuestionButton {
-  background-color: v-bind(TWT);
-  color: white;
-  width: 150px;
-  margin-left: 320px;
-}
-.newQuestionHint {
-  font-size: 18px;
-  text-align: center;
-  margin-top: 20px;
-}
-.gradePickerL :deep(.el-date-editor.el-input) {
-  width: 100px !important;
-}
-.gradePickerR :deep(.el-date-editor.el-input) {
-  width: 100px !important;
-}
-:deep(.el-date-editor.el-input) {
-  width: 330px !important;
-}
-.gradePickerL {
-  margin: 0 20px 0 60px;
-}
-.gradePickerR {
-  margin: 0 20px 0 20px;
-}
-.departmentSelector {
-  margin-left: 60px;
-  width: 500px;
-}
-.campusSelector {
-  margin-left: 60px;
 }
 .PreAndSaveButton {
   width: 264px;
